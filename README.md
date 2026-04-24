@@ -15,6 +15,16 @@ You tell Claude something like *"add two loaves of bread and half a kg of cucumb
 
 No credentials leave your machine. selver-mcp never sees your Selver.ee password.
 
+## Easiest install: let your AI agent do it
+
+If you already have an AI coding agent with shell and filesystem access - **Claude Code** works out of the box, Claude Desktop works if you have a filesystem or shell MCP installed - the fastest install is to paste this prompt:
+
+> Please install selver-mcp from https://github.com/martparve/selver-mcp following its README. Set up both MCPs (selver-mcp and chrome-devtools) and configure the CLAUDE.md workflow section for me. Then restart yourself.
+
+The agent will clone the repo, run `npm install && npm run build`, wire up the MCPs in your config file, copy the skill (Claude Code) or append to `~/.claude/CLAUDE.md` (Claude Desktop), and tell you to restart.
+
+If your agent doesn't have those permissions (browser-only ChatGPT, Claude.ai web, etc.), fall back to the manual steps below.
+
 ## Prerequisites
 
 You need **Node.js 18 or newer**. Check if you have it:
@@ -129,7 +139,7 @@ Claude Desktop doesn't auto-discover `~/.claude/skills/` the way Claude Code doe
 
 Append this section to `~/.claude/CLAUDE.md`:
 
-```markdown
+````markdown
 # Selver.ee shopping (selver-mcp + chrome-devtools)
 
 When the user wants to shop at Selver.ee, always use BOTH `selver-mcp` (server-side cart) and `chrome-devtools` (browser) together. Neither alone is enough.
@@ -157,7 +167,7 @@ After `add_to_cart` returns a `cart_token`, do all four steps in the browser:
    ```
 
 For weight-based products (weight_step not null), qty must be a multiple of weight_step (e.g. 0.3, 0.6, 0.9...). Integer qty on weight goods fails with "Toote samm on muutunud".
-```
+````
 
 Full reference including pitfalls is in `skills/selver-cart/SKILL.md` in this repo.
 
