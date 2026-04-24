@@ -65,7 +65,9 @@ localStorage.setItem('shop/cart/current-cart-token', JSON.stringify('<CART_TOKEN
 mcp__chrome-devtools__navigate_page type=url url="https://www.selver.ee/cart"
 ```
 
-**Step D:** Replay server items through the SPA's own add-to-cart flow (this is the critical step - without it, the SPA shows an empty cart even though the server has items):
+**Step D:** Replay server items through the SPA's own add-to-cart flow (this is the critical step - without it, the SPA shows an empty cart even though the server has items).
+
+**Important:** skip any SKU that's already in `cartItems`. Otherwise `cart/addItem` adds to the existing qty (e.g. cart shows 1.2 kg cucumber instead of 0.6) - because the SPA's add flow is "merge qty", not "replace". This matters both on fresh sessions (where the SPA's boot pull may have populated some items) and on subsequent `add_to_cart` calls to a browser that's already open.
 
 ```js
 async () => {
@@ -74,19 +76,32 @@ async () => {
   const res = await fetch(`/api/cart/pull?cartId=${token}&storeCode=et`);
   const serverItems = (await res.json()).result;
 
+  const added = [], skipped = [], mismatched = [];
   for (const serverItem of serverItems) {
+    const existing = store.state.cart.cartItems.find(i => i.sku === serverItem.sku);
+    if (existing) {
+      if (Math.abs(existing.qty - serverItem.qty) > 1e-4) {
+        mismatched.push({ sku: serverItem.sku, client_qty: existing.qty, server_qty: serverItem.qty });
+      } else {
+        skipped.push(serverItem.sku);
+      }
+      continue;
+    }
     const variant = await store.dispatch('cart/getProductVariant', { serverItem });
     if (variant) {
       await store.dispatch('cart/addItem', {
         productToAdd: variant,
         forceServerSilence: true,
       });
+      added.push(serverItem.sku);
     }
   }
   await store.dispatch('cart/syncTotals', { forceServerSync: true });
-  return { count: store.state.cart.cartItems.length };
+  return { added, skipped, mismatched, total: store.state.cart.cartItems.length };
 }
 ```
+
+The snippet returns `{added, skipped, mismatched}`. If `mismatched` is non-empty, the client and server disagree on qty for some SKU - usually means the server-side `add_to_cart` added more after the browser was already open. To reconcile: call `cart/updateItem` with the server qty, or let the user decide.
 
 Confirm the cart shows real products with correct prices. Tell the user to log in and check out.
 

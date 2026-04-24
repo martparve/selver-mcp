@@ -263,25 +263,37 @@ localStorage.setItem('shop/cart/current-cart-token', JSON.stringify('<CART_TOKEN
 
 **Step 2:** Navigate to `https://www.selver.ee/cart`.
 
-**Step 3:** Run this snippet (pulls server items and replays them through the SPA's own add-to-cart flow with `forceServerSilence: true`, so no duplicate API calls):
+**Step 3:** Run this snippet (pulls server items and replays them through the SPA's own add-to-cart flow with `forceServerSilence: true`, so no duplicate API calls). Note the SKU-existence check before each `addItem` - without it, items already in `cartItems` get their qty added (e.g. 0.6 kg cucumber becomes 1.2 kg) because `cart/addItem` is a merge-qty operation, not replace:
 
 ```js
-const $app = document.getElementById('app');
-const store = ($app.__vue_app__?._instance?.proxy ?? $app.__vue__).$store;
+const store = document.getElementById('app').__vue__.$store;
 const token = JSON.parse(localStorage.getItem('shop/cart/current-cart-token'));
 const serverItems = (await fetch(`/api/cart/pull?cartId=${token}&storeCode=et`).then(r => r.json())).result;
 
+const added = [], skipped = [], mismatched = [];
 for (const serverItem of serverItems) {
+  const existing = store.state.cart.cartItems.find(i => i.sku === serverItem.sku);
+  if (existing) {
+    if (Math.abs(existing.qty - serverItem.qty) > 1e-4) {
+      mismatched.push({ sku: serverItem.sku, client_qty: existing.qty, server_qty: serverItem.qty });
+    } else {
+      skipped.push(serverItem.sku);
+    }
+    continue;
+  }
   const variant = await store.dispatch('cart/getProductVariant', { serverItem });
   if (variant) {
     await store.dispatch('cart/addItem', {
       productToAdd: variant,
       forceServerSilence: true,
     });
+    added.push(serverItem.sku);
   }
 }
 await store.dispatch('cart/syncTotals', { forceServerSync: true });
 ```
+
+Returns `{added, skipped, mismatched}`. If `mismatched` is non-empty, client and server disagree on qty for some SKU - call `cart/updateItem` with the server qty or ask the user.
 
 **Why this works:** `getProductVariant` fetches the full product record and merges in the server's `item_id` / `quote_id`. `addItem` with `forceServerSilence: true` runs the SPA's full client-side add logic (setting internal flags, triggering reactivity) without calling the server add endpoint - since the items are already there.
 
@@ -294,8 +306,7 @@ await store.dispatch('cart/syncTotals', { forceServerSync: true });
 **After `remove_from_cart`** - run:
 
 ```js
-const $app = document.getElementById('app');
-const store = ($app.__vue_app__?._instance?.proxy ?? $app.__vue__).$store;
+const store = document.getElementById('app').__vue__.$store;
 const skusToRemove = ['<SKU1>', '<SKU2>'];
 for (const sku of skusToRemove) {
   const item = store.state.cart.cartItems.find(i => i.sku === sku);
