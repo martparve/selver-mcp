@@ -123,27 +123,58 @@ Open the config file in any text editor and paste this (if you already have othe
 
 **Important:** replace `/Users/YOUR_NAME/selver-mcp` with the actual path where you cloned the repo. On Windows this might be something like `C:\\Users\\YourName\\selver-mcp` - note the double backslashes.
 
-### 4. Install the skill (optional but recommended)
+### 4. Add the workflow to your global Claude instructions
 
-The skill tells Claude how to use both MCPs together automatically. Claude Desktop reads skills from the same location as Claude Code:
+Claude Desktop doesn't auto-discover `~/.claude/skills/` the way Claude Code does - if you skip this step, Claude Desktop might open an empty cart page instead of the real cart. The reliable fix is to paste the workflow into your global CLAUDE.md file at `~/.claude/CLAUDE.md` (create the file if missing).
+
+Append this section to `~/.claude/CLAUDE.md`:
+
+```markdown
+# Selver.ee shopping (selver-mcp + chrome-devtools)
+
+When the user wants to shop at Selver.ee, always use BOTH `selver-mcp` (server-side cart) and `chrome-devtools` (browser) together. Neither alone is enough.
+
+After `add_to_cart` returns a `cart_token`, do all four steps in the browser:
+
+1. Open `https://www.selver.ee` via `mcp__chrome-devtools__new_page`
+2. Run `evaluate_script`:
+   `localStorage.setItem('shop/cart/current-cart-token', JSON.stringify('<CART_TOKEN>'))`
+3. Navigate to `https://www.selver.ee/cart`
+4. Run this replay snippet (skips items already in cartItems to avoid doubled qty):
+
+   ```js
+   async () => {
+     const store = document.getElementById('app').__vue__.$store;
+     const token = JSON.parse(localStorage.getItem('shop/cart/current-cart-token'));
+     const serverItems = (await fetch(`/api/cart/pull?cartId=${token}&storeCode=et`).then(r => r.json())).result;
+     for (const it of serverItems) {
+       if (store.state.cart.cartItems.find(i => i.sku === it.sku)) continue;
+       const variant = await store.dispatch('cart/getProductVariant', { serverItem: it });
+       if (variant) await store.dispatch('cart/addItem', { productToAdd: variant, forceServerSilence: true });
+     }
+     await store.dispatch('cart/syncTotals', { forceServerSync: true });
+   }
+   ```
+
+For weight-based products (weight_step not null), qty must be a multiple of weight_step (e.g. 0.3, 0.6, 0.9...). Integer qty on weight goods fails with "Toote samm on muutunud".
+```
+
+Full reference including pitfalls is in `skills/selver-cart/SKILL.md` in this repo.
+
+### 5. Copy the skill (optional, for Claude Code compatibility)
+
+If you also use Claude Code on the same machine, the skill will work there automatically:
 
 ```bash
 mkdir -p ~/.claude/skills/selver-cart
 cp ~/selver-mcp/skills/selver-cart/SKILL.md ~/.claude/skills/selver-cart/SKILL.md
 ```
 
-On Windows (PowerShell):
-
-```powershell
-New-Item -ItemType Directory -Force "$HOME\.claude\skills\selver-cart"
-Copy-Item "$HOME\selver-mcp\skills\selver-cart\SKILL.md" "$HOME\.claude\skills\selver-cart\SKILL.md"
-```
-
-### 5. Restart Claude Desktop
+### 6. Restart Claude Desktop
 
 Quit Claude Desktop completely (not just close the window) and reopen it.
 
-### 6. Try it
+### 7. Try it
 
 In a new chat, type the same example as above. Claude will ask permission to use the MCP tools the first time - click Allow.
 
