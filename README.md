@@ -15,13 +15,36 @@ You tell Claude something like *"add two loaves of bread and half a kg of cucumb
 
 No credentials leave your machine. selver-mcp never sees your Selver.ee password.
 
+## A real example: Turkish high-protein meal prep
+
+Once installed, you can chain selver-mcp with Claude's normal capabilities. A real session:
+
+**1. The prompt** (in Estonian - works equally well in English):
+
+![Prompt: find 3 Turkish high-protein recipes, search Selver for the ingredients, add enough for 5 portions x ~50g protein each, then write the final recipes back to chat](examples/images/01-prompt.png)
+
+> 1) Otsi netist 3 Türgi-pärast, valgurohket retsepti
+> 2) Otsi Selverist vajaminevad koostisosad (kui täpne on puudu, siis asenda sobivaga)
+> 3) Pane neid ostukorvi koguses, et saaksin iga rooga 5 portsionit, igas portsjonis ~50g valku
+> 4) kirjuta lõplikud retseptid mulle siia chati
+
+**2. Claude's reply** - real Estonian recipes with measured ingredients and steps:
+
+![Recipe output: "Tavuk Şiş - Türgi jogurtikanavardad", 51g protein per portion, full ingredient list and cooking steps in Estonian](examples/images/02-recipe.png)
+
+**3. The cart, populated and ready for checkout** - opens automatically in Chrome after Claude finishes reasoning:
+
+![Selver cart showing chicken, ground beef, Greek yogurt, bulgur, feta, baby spinach, tomatoes, crushed tomatoes and more - 124.84€ total](examples/images/03-cart.png)
+
+All in one conversation. Claude handles recipe research, ingredient mapping to real SKUs (substituting when exact matches are out of stock), weight-based quantity math (chicken by kg, spinach by weight step), and the browser orchestration that shows you the cart ready to check out.
+
 ## Easiest install: let your AI agent do it
 
 If you already have an AI coding agent with shell and filesystem access - **Claude Code** works out of the box, Claude Desktop works if you have a filesystem or shell MCP installed - the fastest install is to paste this prompt:
 
-> Please install selver-mcp from https://github.com/martparve/selver-mcp following its README. Set up both MCPs (selver-mcp and chrome-devtools) and configure the CLAUDE.md workflow section for me. Then restart yourself.
+> Please install selver-mcp from https://github.com/martparve/selver-mcp following its README. Set up both MCPs (selver-mcp and chrome-devtools) for my client, and do the post-install step for getting the cart workflow into context (skill file for Claude Code, memory for Claude Desktop). Then tell me to restart.
 
-The agent will clone the repo, run `npm install && npm run build`, wire up the MCPs in your config file, copy the skill (Claude Code) or append to `~/.claude/CLAUDE.md` (Claude Desktop), and tell you to restart.
+The agent will clone the repo, run `npm install && npm run build`, wire up the MCPs in your config file, and handle the workflow-in-context step appropriate for your client.
 
 If your agent doesn't have those permissions (browser-only ChatGPT, Claude.ai web, etc.), fall back to the manual steps below.
 
