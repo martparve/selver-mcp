@@ -1,7 +1,5 @@
 // src/tools/cart.ts
 import { z } from 'zod';
-import { exec } from 'child_process';
-import { platform } from 'os';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { SelverClient } from '../selver/client.js';
 import { readCartToken, writeCartToken, clearCartToken } from '../storage/cart-token.js';
@@ -13,13 +11,6 @@ async function getOrCreateCart(client: SelverClient): Promise<string> {
   if (!token) throw new Error('Failed to create Selver cart');
   await writeCartToken(token);
   return token;
-}
-
-function openUrl(url: string): void {
-  const cmd = platform() === 'darwin' ? 'open'
-    : platform() === 'win32' ? 'start'
-    : 'xdg-open';
-  exec(`${cmd} "${url}"`);
 }
 
 export function registerCartTools(server: McpServer, client: SelverClient): void {
@@ -147,18 +138,4 @@ export function registerCartTools(server: McpServer, client: SelverClient): void
     }
   );
 
-  server.tool(
-    'open_cart',
-    'Open Selver.ee cart page in your default browser for login and checkout.',
-    {},
-    async () => {
-      openUrl('https://www.selver.ee/cart');
-      return {
-        content: [{
-          type: 'text' as const,
-          text: JSON.stringify({ message: 'Opened Selver cart in your browser - log in to complete checkout' }),
-        }],
-      };
-    }
-  );
 }
