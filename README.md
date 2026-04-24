@@ -91,6 +91,25 @@ The cart now renders with real product images, working qty controls, correct tot
 
 **Why this works:** `getProductVariant` fetches the full product record and merges in the server's `item_id` / `quote_id`. `addItem` with `forceServerSilence: true` runs the SPA's full client-side add logic (setting internal flags, triggering reactivity) without calling the server add endpoint - since the items are already there.
 
+### Keeping an open browser in sync
+
+`add_to_cart` / `remove_from_cart` mutate the server cart only. A browser already open on `selver.ee/cart` has its own Vuex state that won't update automatically. When an open browser exists, chain each mutation with the matching SPA action via chrome-devtools-mcp.
+
+**After `add_to_cart`** - run the orchestration snippet in the previous section (replays new server items through `cart/addItem`).
+
+**After `remove_from_cart`** - run:
+
+```js
+const store = document.getElementById('app').__vue_app__._instance.proxy.$store;
+const skusToRemove = ['<SKU1>', '<SKU2>'];  // SKUs that were removed server-side
+for (const sku of skusToRemove) {
+  const item = store.state.cart.cartItems.find(i => i.sku === sku);
+  if (item) await store.dispatch('cart/removeItem', { product: item });
+}
+```
+
+This uses the SPA's own `cart/removeItem` action to drop each item from the Vuex store. The UI updates immediately, totals recalculate, and the browser's state is consistent with the server again.
+
 ## Usage tips
 
 - Use Estonian search terms: "kana" (chicken), "riis" (rice), "lohe" (salmon), "muna" (eggs)

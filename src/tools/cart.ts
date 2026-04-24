@@ -16,7 +16,7 @@ async function getOrCreateCart(client: SelverClient): Promise<string> {
 export function registerCartTools(server: McpServer, client: SelverClient): void {
   server.tool(
     'add_to_cart',
-    'Add products to Selver.ee guest cart by SKU. Creates a new cart if none exists.',
+    'Add products to Selver.ee guest cart by SKU. Creates a new cart if none exists. Server-side only - if a browser is open on selver.ee/cart, you must ALSO dispatch cart/addItem via chrome-devtools-mcp to keep the browser in sync (see README).',
     {
       items: z.array(z.object({
         sku: z.string().describe('Product SKU (e.g. "T000089179")'),
@@ -97,7 +97,7 @@ export function registerCartTools(server: McpServer, client: SelverClient): void
 
   server.tool(
     'remove_from_cart',
-    'Remove products from Selver.ee cart by SKU.',
+    'Remove products from Selver.ee cart by SKU. Server-side only - if a browser is open on selver.ee/cart, you must ALSO dispatch cart/removeItem via chrome-devtools-mcp to keep the browser in sync (see README).',
     {
       items: z.array(z.object({
         sku: z.string().describe('Product SKU to remove'),
