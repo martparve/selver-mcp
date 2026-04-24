@@ -69,7 +69,7 @@ mcp__chrome-devtools__navigate_page type=url url="https://www.selver.ee/cart"
 
 ```js
 async () => {
-  const store = document.getElementById('app').__vue_app__._instance.proxy.$store;
+  const store = document.getElementById('app').__vue__.$store;
   const token = JSON.parse(localStorage.getItem('shop/cart/current-cart-token'));
   const res = await fetch(`/api/cart/pull?cartId=${token}&storeCode=et`);
   const serverItems = (await res.json()).result;
@@ -100,7 +100,7 @@ If the browser is already open with items shown:
 
 ```js
 async () => {
-  const store = document.getElementById('app').__vue_app__._instance.proxy.$store;
+  const store = document.getElementById('app').__vue__.$store;
   const skusToRemove = ['<SKU1>', '<SKU2>'];
   for (const sku of skusToRemove) {
     const item = store.state.cart.cartItems.find(i => i.sku === sku);
