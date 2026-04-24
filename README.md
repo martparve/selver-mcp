@@ -1,60 +1,239 @@
 # selver-mcp
 
-MCP server for searching [Selver.ee](https://www.selver.ee) products and managing your shopping cart. Works with Claude Code, Claude Desktop, and any MCP-compatible client.
+Let Claude shop at [Selver.ee](https://www.selver.ee) for you. Search products, build a shopping cart, and open it in your browser ready for checkout - all from a conversation with Claude.
 
-## Setup
+**Works with:** Claude Desktop, Claude Code, and any MCP-compatible client.
+
+## What you get
+
+You tell Claude something like *"add two loaves of bread and half a kg of cucumber to my Selver cart and open it"* and Claude:
+
+1. Searches Selver.ee for matching products
+2. Picks the best options (handles weight-based goods correctly)
+3. Builds a guest cart on selver.ee
+4. Opens Chrome with the cart visible, ready for you to log in and pay
+
+No credentials leave your machine. selver-mcp never sees your Selver.ee password.
+
+## Prerequisites
+
+You need **Node.js 18 or newer**. Check if you have it:
 
 ```bash
-git clone <repo-url>
-cd selver-mcp
+node --version
+```
+
+If you see `v18.x.x` or higher, you're set. Otherwise:
+
+- **macOS**: easiest is [Homebrew](https://brew.sh) → `brew install node`
+- **Windows / Linux / any OS**: download from [nodejs.org](https://nodejs.org) (pick the LTS version)
+
+## Install - Claude Code
+
+### 1. Download selver-mcp
+
+Open a terminal and run:
+
+```bash
+git clone https://github.com/YOUR_USERNAME/selver-mcp.git ~/selver-mcp
+cd ~/selver-mcp
 npm install
 npm run build
 ```
 
-## Install
+This downloads the code, installs dependencies, and compiles it. Takes about a minute.
 
-### Claude Code
+### 2. Connect it to Claude Code
 
 ```bash
-claude mcp add selver-mcp node /absolute/path/to/selver-mcp/dist/index.js
+claude mcp add selver-mcp node ~/selver-mcp/dist/index.js
 ```
 
-### Claude Desktop
+### 3. Install the browser helper
 
-Add to `claude_desktop_config.json`:
+selver-mcp builds your cart on Selver's servers, but to actually **see and check out** the cart, Claude needs a browser-control helper called `chrome-devtools-mcp`. One command:
+
+```bash
+claude mcp add chrome-devtools --scope user -- npx -y chrome-devtools-mcp@latest
+```
+
+### 4. Install the skill (optional but recommended)
+
+A skill tells Claude how to use both MCPs together automatically. Without it, you'd need to remind Claude to open the browser after building the cart.
+
+```bash
+mkdir -p ~/.claude/skills/selver-cart
+cp ~/selver-mcp/skills/selver-cart/SKILL.md ~/.claude/skills/selver-cart/SKILL.md
+```
+
+### 5. Restart Claude Code
+
+Close any running Claude Code session and start a new one. The MCPs are now available.
+
+### 6. Try it
+
+In a new Claude Code chat, type:
+
+> Lisa mulle Selverist 2 pätsi musta leiba ja ava cart
+
+or in English:
+
+> Add 2 black breads from Selver to my cart and open it in the browser
+
+Claude should search, add, open a Chrome window showing your cart, and tell you to log in.
+
+## Install - Claude Desktop
+
+### 1. Download selver-mcp
+
+Same as Claude Code step 1:
+
+```bash
+git clone https://github.com/YOUR_USERNAME/selver-mcp.git ~/selver-mcp
+cd ~/selver-mcp
+npm install
+npm run build
+```
+
+### 2. Find your Claude Desktop config file
+
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+If the file doesn't exist, create it.
+
+### 3. Add both MCPs to the config
+
+Open the config file in any text editor and paste this (if you already have other MCPs, merge the `mcpServers` section):
 
 ```json
 {
   "mcpServers": {
     "selver-mcp": {
       "command": "node",
-      "args": ["/absolute/path/to/selver-mcp/dist/index.js"]
+      "args": ["/Users/YOUR_NAME/selver-mcp/dist/index.js"]
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"]
     }
   }
 }
 ```
 
-## Tools
+**Important:** replace `/Users/YOUR_NAME/selver-mcp` with the actual path where you cloned the repo. On Windows this might be something like `C:\\Users\\YourName\\selver-mcp` - note the double backslashes.
+
+### 4. Restart Claude Desktop
+
+Quit Claude Desktop completely (not just close the window) and reopen it.
+
+### 5. Try it
+
+In a new chat, type the same example as above. Claude will ask permission to use the MCP tools the first time - click Allow.
+
+## How to verify it works
+
+Ask Claude in a new chat:
+
+> What Selver tools do you have available?
+
+Claude should list four tools: `search_products`, `add_to_cart`, `view_cart`, `remove_from_cart`. Plus a bunch of `chrome-devtools` tools.
+
+## Usage examples
+
+**Build a shopping cart and open the browser:**
+> Leia mulle Selverist 5 erinevat juustu ja ava cart brauseris.
+
+**Just search, don't commit:**
+> Mis on praegu Selveris odavaim kuivtoit?
+
+**Remove items:**
+> Võta kurk ostukorvist välja.
+
+**Start fresh:**
+> Tühjenda mu Selveri cart.
+
+### Tips
+
+- Use Estonian search terms for best results: `leib` (bread), `piim` (milk), `muna` (egg), `kana` (chicken)
+- Cart persists between conversations - pick up tomorrow where you left off
+- For weight-based goods (cucumber, meat, vegetables sold by kg), Claude will automatically figure out valid quantities (e.g. 0.3 kg increments)
+
+## Troubleshooting
+
+**"The browser is already running" error**
+
+Left over from a previous session. Close any orphan Chrome windows manually, or run:
+
+```bash
+pkill -f 'chrome-devtools-mcp/chrome-profile'
+```
+
+**Cart is empty in the browser even though Claude added items**
+
+The skill handles this automatically. If you skipped the skill install, remind Claude: *"use chrome-devtools to replay the server cart items via cart/getProductVariant and cart/addItem with forceServerSilence: true"*.
+
+**"Toote samm on muutunud" error when adding weight goods**
+
+The product is sold in fixed kg increments (e.g. 0.3 kg). Use valid multiples: 0.3, 0.6, 0.9... Claude should handle this automatically; if not, tell it the product's `weight_step`.
+
+**npm command not found**
+
+You haven't installed Node.js. See the Prerequisites section above.
+
+**claude command not found**
+
+Claude Code CLI isn't installed or isn't on your PATH. Check the [Claude Code docs](https://docs.claude.com/en/docs/claude-code) for installation.
+
+## Updating
+
+When there's a new version:
+
+```bash
+cd ~/selver-mcp
+git pull
+npm install
+npm run build
+```
+
+Then restart Claude Code or Claude Desktop.
+
+## Uninstall
+
+**Claude Code:**
+
+```bash
+claude mcp remove selver-mcp
+claude mcp remove chrome-devtools
+rm -rf ~/selver-mcp
+rm -rf ~/.claude/skills/selver-cart
+```
+
+**Claude Desktop:** remove the `selver-mcp` and `chrome-devtools` entries from `claude_desktop_config.json` and delete `~/selver-mcp`.
+
+Your guest cart token lives at `~/.selver-mcp/cart.json`. Delete that to start completely fresh.
+
+---
+
+## For developers
+
+Everything below is for people who want to understand the internals or contribute.
+
+### Tools
 
 | Tool | Description |
 |------|-------------|
-| `search_products` | Search Selver.ee by query. Returns products with prices, nutrition, stock status. |
-| `add_to_cart` | Add products to a guest cart by SKU. |
+| `search_products` | Search Selver.ee by query. Returns products with prices, nutrition, stock status, and `weight_step` for weight-based goods. |
+| `add_to_cart` | Add products to a guest cart by SKU. Returns server error messages verbatim (e.g. `"Toote samm on muutunud (0.3)"`). |
 | `view_cart` | View cart contents and total. |
 | `remove_from_cart` | Remove products from cart by SKU. |
 
-## Checkout in a real browser
+### Checkout in a real browser - the technical reality
 
-selver-mcp builds a Selver guest cart via the server API, but viewing and checking out that cart in the browser requires more than just opening `selver.ee/cart`. Selver's SPA:
+selver-mcp builds a Selver guest cart via the server API, but viewing and checking out that cart in the browser requires more than just opening `selver.ee/cart`. Selver's Vue Storefront SPA:
 
 1. Isolates `localStorage` per origin, so the cart token can't be injected from outside the selver.ee page
 2. In default guest mode, treats the local (empty) cart as authoritative and ignores the server's items - even though its own API call returns them
-
-The reliable way to restore a server cart in a fresh browser session is to orchestrate via [chrome-devtools-mcp](https://github.com/ChromeDevTools/chrome-devtools-mcp):
-
-```bash
-claude mcp add chrome-devtools --scope user -- npx -y chrome-devtools-mcp@latest
-```
 
 ### Orchestration pattern
 
@@ -71,7 +250,8 @@ localStorage.setItem('shop/cart/current-cart-token', JSON.stringify('<CART_TOKEN
 **Step 3:** Run this snippet (pulls server items and replays them through the SPA's own add-to-cart flow with `forceServerSilence: true`, so no duplicate API calls):
 
 ```js
-const store = document.getElementById('app').__vue_app__._instance.proxy.$store;
+const $app = document.getElementById('app');
+const store = ($app.__vue_app__?._instance?.proxy ?? $app.__vue__).$store;
 const token = JSON.parse(localStorage.getItem('shop/cart/current-cart-token'));
 const serverItems = (await fetch(`/api/cart/pull?cartId=${token}&storeCode=et`).then(r => r.json())).result;
 
@@ -87,35 +267,47 @@ for (const serverItem of serverItems) {
 await store.dispatch('cart/syncTotals', { forceServerSync: true });
 ```
 
-The cart now renders with real product images, working qty controls, correct totals, and a live checkout button. User can log in and complete purchase normally.
-
 **Why this works:** `getProductVariant` fetches the full product record and merges in the server's `item_id` / `quote_id`. `addItem` with `forceServerSilence: true` runs the SPA's full client-side add logic (setting internal flags, triggering reactivity) without calling the server add endpoint - since the items are already there.
 
 ### Keeping an open browser in sync
 
-`add_to_cart` / `remove_from_cart` mutate the server cart only. A browser already open on `selver.ee/cart` has its own Vuex state that won't update automatically. When an open browser exists, chain each mutation with the matching SPA action via chrome-devtools-mcp.
+`add_to_cart` / `remove_from_cart` mutate the server cart only. A browser already open on `selver.ee/cart` has its own Vuex state that won't update automatically.
 
-**After `add_to_cart`** - run the orchestration snippet in the previous section (replays new server items through `cart/addItem`).
+**After `add_to_cart`** - run the orchestration snippet above (replays new server items through `cart/addItem`).
 
 **After `remove_from_cart`** - run:
 
 ```js
-const store = document.getElementById('app').__vue_app__._instance.proxy.$store;
-const skusToRemove = ['<SKU1>', '<SKU2>'];  // SKUs that were removed server-side
+const $app = document.getElementById('app');
+const store = ($app.__vue_app__?._instance?.proxy ?? $app.__vue__).$store;
+const skusToRemove = ['<SKU1>', '<SKU2>'];
 for (const sku of skusToRemove) {
   const item = store.state.cart.cartItems.find(i => i.sku === sku);
   if (item) await store.dispatch('cart/removeItem', { product: item });
 }
 ```
 
-This uses the SPA's own `cart/removeItem` action to drop each item from the Vuex store. The UI updates immediately, totals recalculate, and the browser's state is consistent with the server again.
+### Build from source
 
-## Usage tips
+```bash
+npm install      # install dependencies
+npm run build    # compile TypeScript to dist/
+npm test         # run unit tests (36 tests)
+npm run dev      # watch mode
+```
 
-- Use Estonian search terms: "kana" (chicken), "riis" (rice), "lohe" (salmon), "muna" (eggs)
-- Cart persists between sessions via `~/.selver-mcp/cart.json`
+### Architecture
 
-## Requirements
-
-- Node.js 18+
-- No API keys or configuration needed
+```
+src/
+├── index.ts            # MCP server entry point (stdio transport)
+├── tools/              # MCP tool handlers (Zod schemas, response formatting)
+│   ├── search.ts       # search_products
+│   └── cart.ts         # add_to_cart, view_cart, remove_from_cart
+├── selver/             # Selver.ee HTTP layer (reusable, no MCP deps)
+│   ├── client.ts       # SelverClient: search + guest cart API
+│   ├── parser.ts       # Nutrition string parsing (Estonian comma decimals)
+│   └── types.ts        # Product, CartItem, etc.
+└── storage/
+    └── cart-token.ts   # Read/write ~/.selver-mcp/cart.json
+```
