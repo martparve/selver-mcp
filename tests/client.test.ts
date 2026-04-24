@@ -101,6 +101,29 @@ describe('SelverClient', () => {
       const results = await client.searchProducts('kana');
       expect(results[0].in_stock).toBe(true);
     });
+
+    it('surfaces weight_step for weight-based products', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+        new Response(JSON.stringify({
+          hits: { total: 1, hits: [{ _source: {
+            ...mockProduct,
+            product_weight_step: 0.3,
+          } }] },
+        }))
+      );
+      const results = await client.searchProducts('kurk');
+      expect(results[0].weight_step).toBe(0.3);
+    });
+
+    it('returns weight_step as null for non-weight products', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+        new Response(JSON.stringify({
+          hits: { total: 1, hits: [{ _source: mockProduct }] },
+        }))
+      );
+      const results = await client.searchProducts('kana');
+      expect(results[0].weight_step).toBeNull();
+    });
   });
 
   describe('createCart', () => {
@@ -128,12 +151,12 @@ describe('SelverClient', () => {
   });
 
   describe('addToCart', () => {
-    it('sends correct payload and returns true on success', async () => {
+    it('sends correct payload and returns ok on success', async () => {
       vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
         new Response(JSON.stringify({ code: 200 }))
       );
-      const ok = await client.addToCart('token123', 'T000089179', 2);
-      expect(ok).toBe(true);
+      const r = await client.addToCart('token123', 'T000089179', 2);
+      expect(r.ok).toBe(true);
       expect(fetch).toHaveBeenCalledWith(
         expect.stringContaining('/cart/update?token=token123&cartId=token123'),
         expect.objectContaining({
@@ -143,12 +166,22 @@ describe('SelverClient', () => {
       );
     });
 
-    it('returns false on failure', async () => {
+    it('returns server error message on failure', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+        new Response(JSON.stringify({ code: 400, result: 'Toote samm on muutunud (0.3). Proovi uuesti.' }))
+      );
+      const r = await client.addToCart('token123', 'T000001325', 1);
+      expect(r.ok).toBe(false);
+      expect(r.error).toContain('samm');
+    });
+
+    it('returns HTTP code when server gives no message', async () => {
       vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
         new Response(JSON.stringify({ code: 500 }))
       );
-      const ok = await client.addToCart('token123', 'T000089179', 1);
-      expect(ok).toBe(false);
+      const r = await client.addToCart('token123', 'T000089179', 1);
+      expect(r.ok).toBe(false);
+      expect(r.error).toBe('HTTP 500');
     });
   });
 

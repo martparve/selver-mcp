@@ -37,15 +37,17 @@ export function registerCartTools(server: McpServer, client: SelverClient): void
       const failed: Array<{ sku: string; error: string }> = [];
 
       for (const item of params.items) {
-        const ok = await client.addToCart(token, item.sku, item.qty);
-        if (ok) {
+        const r = await client.addToCart(token, item.sku, item.qty);
+        if (r.ok) {
           added.push(item.sku);
         } else {
-          failed.push({ sku: item.sku, error: 'Add failed' });
+          failed.push({ sku: item.sku, error: r.error ?? 'Add failed' });
         }
       }
 
-      if (added.length === 0 && failed.length > 0) {
+      const allLookLikeExpiredToken = added.length === 0 && failed.length > 0
+        && failed.every(f => !/samm|step|stock|quantity|kogus/i.test(f.error));
+      if (allLookLikeExpiredToken) {
         await clearCartToken();
         const newToken = await client.createCart();
         if (newToken) {
@@ -54,11 +56,11 @@ export function registerCartTools(server: McpServer, client: SelverClient): void
           added.length = 0;
           failed.length = 0;
           for (const item of params.items) {
-            const ok = await client.addToCart(token, item.sku, item.qty);
-            if (ok) {
+            const r = await client.addToCart(token, item.sku, item.qty);
+            if (r.ok) {
               added.push(item.sku);
             } else {
-              failed.push({ sku: item.sku, error: 'Add failed after cart retry' });
+              failed.push({ sku: item.sku, error: r.error ?? 'Add failed after cart retry' });
             }
           }
         }

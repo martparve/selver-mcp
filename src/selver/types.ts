@@ -6,6 +6,7 @@ export interface SelverRawProduct {
   final_price_incl_tax: number;
   unit_price: number;
   product_volume: string | null;
+  product_weight_step: number | null;
   image: string;
   stock: {
     is_in_stock: boolean;
@@ -31,8 +32,14 @@ export interface Product {
   price: number;
   unit_price: number;
   volume: string | null;
+  weight_step: number | null;
   in_stock: boolean;
   nutrition: NutritionPer100g | null;
+}
+
+export interface AddToCartResult {
+  ok: boolean;
+  error?: string;
 }
 
 export interface CartItem {
