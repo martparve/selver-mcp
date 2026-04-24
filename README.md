@@ -133,60 +133,54 @@ Open the config file in any text editor and paste this (if you already have othe
 
 **Important:** replace `/Users/YOUR_NAME/selver-mcp` with the actual path where you cloned the repo. On Windows this might be something like `C:\\Users\\YourName\\selver-mcp` - note the double backslashes.
 
-### 4. Add the workflow to your global Claude instructions
+### 4. Save the workflow as a Claude Desktop memory
 
-Claude Desktop doesn't auto-discover `~/.claude/skills/` the way Claude Code does - if you skip this step, Claude Desktop might open an empty cart page instead of the real cart. The reliable fix is to paste the workflow into your global CLAUDE.md file at `~/.claude/CLAUDE.md` (create the file if missing).
+Claude Desktop doesn't read `~/.claude/CLAUDE.md` or auto-discover `~/.claude/skills/` the way Claude Code does. Without the workflow in context, Claude Desktop will open an empty cart page instead of the real cart.
 
-Append this section to `~/.claude/CLAUDE.md`:
+The fix is Claude Desktop's **memory** feature: you paste the instructions into a chat and ask Claude to save them. Memories persist across all future conversations.
 
-````markdown
-# Selver.ee shopping (selver-mcp + chrome-devtools)
+**Restart Claude Desktop first** (so the new MCPs are loaded), then in a new chat paste:
 
-When the user wants to shop at Selver.ee, always use BOTH `selver-mcp` (server-side cart) and `chrome-devtools` (browser) together. Neither alone is enough.
+> Please save the following as a memory so you always follow it when I shop at Selver.ee:
+>
+> ---
+>
+> When the user wants to shop at Selver.ee, always use BOTH `selver-mcp` (server-side cart) and `chrome-devtools` (browser) together. Neither alone is enough.
+>
+> After `add_to_cart` returns a `cart_token`, do all four steps in the browser:
+>
+> 1. Open `https://www.selver.ee` via `mcp__chrome-devtools__new_page`
+> 2. Run `evaluate_script`: `localStorage.setItem('shop/cart/current-cart-token', JSON.stringify('<CART_TOKEN>'))`
+> 3. Navigate to `https://www.selver.ee/cart`
+> 4. Run this replay snippet (skip items already in `cartItems` to avoid doubled qty):
+>
+> ```js
+> async () => {
+>   const store = document.getElementById('app').__vue__.$store;
+>   const token = JSON.parse(localStorage.getItem('shop/cart/current-cart-token'));
+>   const serverItems = (await fetch(`/api/cart/pull?cartId=${token}&storeCode=et`).then(r => r.json())).result;
+>   for (const it of serverItems) {
+>     if (store.state.cart.cartItems.find(i => i.sku === it.sku)) continue;
+>     const variant = await store.dispatch('cart/getProductVariant', { serverItem: it });
+>     if (variant) await store.dispatch('cart/addItem', { productToAdd: variant, forceServerSilence: true });
+>   }
+>   await store.dispatch('cart/syncTotals', { forceServerSync: true });
+> }
+> ```
+>
+> For weight-based products (`weight_step` not null), `qty` must be a multiple of `weight_step` (e.g. 0.3, 0.6, 0.9...). Integer qty on weight goods fails with "Toote samm on muutunud".
 
-After `add_to_cart` returns a `cart_token`, do all four steps in the browser:
-
-1. Open `https://www.selver.ee` via `mcp__chrome-devtools__new_page`
-2. Run `evaluate_script`:
-   `localStorage.setItem('shop/cart/current-cart-token', JSON.stringify('<CART_TOKEN>'))`
-3. Navigate to `https://www.selver.ee/cart`
-4. Run this replay snippet (skips items already in cartItems to avoid doubled qty):
-
-   ```js
-   async () => {
-     const store = document.getElementById('app').__vue__.$store;
-     const token = JSON.parse(localStorage.getItem('shop/cart/current-cart-token'));
-     const serverItems = (await fetch(`/api/cart/pull?cartId=${token}&storeCode=et`).then(r => r.json())).result;
-     for (const it of serverItems) {
-       if (store.state.cart.cartItems.find(i => i.sku === it.sku)) continue;
-       const variant = await store.dispatch('cart/getProductVariant', { serverItem: it });
-       if (variant) await store.dispatch('cart/addItem', { productToAdd: variant, forceServerSilence: true });
-     }
-     await store.dispatch('cart/syncTotals', { forceServerSync: true });
-   }
-   ```
-
-For weight-based products (weight_step not null), qty must be a multiple of weight_step (e.g. 0.3, 0.6, 0.9...). Integer qty on weight goods fails with "Toote samm on muutunud".
-````
+Claude Desktop will confirm the memory was saved. From the next message onwards, it will follow this workflow automatically for any Selver request.
 
 Full reference including pitfalls is in `skills/selver-cart/SKILL.md` in this repo.
 
-### 5. Copy the skill (optional, for Claude Code compatibility)
+### 5. Try it
 
-If you also use Claude Code on the same machine, the skill will work there automatically:
+In a new chat:
 
-```bash
-mkdir -p ~/.claude/skills/selver-cart
-cp ~/selver-mcp/skills/selver-cart/SKILL.md ~/.claude/skills/selver-cart/SKILL.md
-```
+> Lisa mulle Selverist 2 pätsi leiba ja ava cart
 
-### 6. Restart Claude Desktop
-
-Quit Claude Desktop completely (not just close the window) and reopen it.
-
-### 7. Try it
-
-In a new chat, type the same example as above. Claude will ask permission to use the MCP tools the first time - click Allow.
+Claude Desktop should search, add, open Chrome with the cart populated, and tell you to log in. The first time MCP tools are used, Claude Desktop will ask permission - click Allow.
 
 ## How to verify it works
 
