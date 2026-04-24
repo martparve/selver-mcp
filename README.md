@@ -123,11 +123,27 @@ Open the config file in any text editor and paste this (if you already have othe
 
 **Important:** replace `/Users/YOUR_NAME/selver-mcp` with the actual path where you cloned the repo. On Windows this might be something like `C:\\Users\\YourName\\selver-mcp` - note the double backslashes.
 
-### 4. Restart Claude Desktop
+### 4. Install the skill (optional but recommended)
+
+The skill tells Claude how to use both MCPs together automatically. Claude Desktop reads skills from the same location as Claude Code:
+
+```bash
+mkdir -p ~/.claude/skills/selver-cart
+cp ~/selver-mcp/skills/selver-cart/SKILL.md ~/.claude/skills/selver-cart/SKILL.md
+```
+
+On Windows (PowerShell):
+
+```powershell
+New-Item -ItemType Directory -Force "$HOME\.claude\skills\selver-cart"
+Copy-Item "$HOME\selver-mcp\skills\selver-cart\SKILL.md" "$HOME\.claude\skills\selver-cart\SKILL.md"
+```
+
+### 5. Restart Claude Desktop
 
 Quit Claude Desktop completely (not just close the window) and reopen it.
 
-### 5. Try it
+### 6. Try it
 
 In a new chat, type the same example as above. Claude will ask permission to use the MCP tools the first time - click Allow.
 
