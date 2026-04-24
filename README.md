@@ -35,7 +35,7 @@ If you see `v18.x.x` or higher, you're set. Otherwise:
 Open a terminal and run:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/selver-mcp.git ~/selver-mcp
+git clone https://github.com/martparve/selver-mcp.git ~/selver-mcp
 cd ~/selver-mcp
 npm install
 npm run build
@@ -89,7 +89,7 @@ Claude should search, add, open a Chrome window showing your cart, and tell you 
 Same as Claude Code step 1:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/selver-mcp.git ~/selver-mcp
+git clone https://github.com/martparve/selver-mcp.git ~/selver-mcp
 cd ~/selver-mcp
 npm install
 npm run build
