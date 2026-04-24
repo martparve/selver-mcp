@@ -152,12 +152,15 @@ describe('SelverClient', () => {
 
   describe('addToCart', () => {
     it('sends correct payload and returns ok on success', async () => {
-      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-        new Response(JSON.stringify({ code: 200 }))
-      );
+      const spy = vi.spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(new Response(JSON.stringify({ code: 200 })))
+        .mockResolvedValueOnce(new Response(JSON.stringify({
+          code: 200,
+          result: [{ item_id: 1, sku: 'T000089179', name: 'X', qty: 2, price: 5 }],
+        })));
       const r = await client.addToCart('token123', 'T000089179', 2);
       expect(r.ok).toBe(true);
-      expect(fetch).toHaveBeenCalledWith(
+      expect(spy).toHaveBeenCalledWith(
         expect.stringContaining('/cart/update?token=token123&cartId=token123'),
         expect.objectContaining({
           method: 'POST',
@@ -182,6 +185,47 @@ describe('SelverClient', () => {
       const r = await client.addToCart('token123', 'T000089179', 1);
       expect(r.ok).toBe(false);
       expect(r.error).toBe('HTTP 500');
+    });
+
+    it('retries when server returns 200 but item is not actually in cart (race condition)', async () => {
+      const spy = vi.spyOn(globalThis, 'fetch')
+        // 1. First update call - server "accepts"
+        .mockResolvedValueOnce(new Response(JSON.stringify({ code: 200 })))
+        // 2. Verify pull - item is NOT in cart (silent drop)
+        .mockResolvedValueOnce(new Response(JSON.stringify({ code: 200, result: [] })))
+        // 3. Retry update call - accepts
+        .mockResolvedValueOnce(new Response(JSON.stringify({ code: 200 })))
+        // 4. Verify pull - item is now present
+        .mockResolvedValueOnce(new Response(JSON.stringify({
+          code: 200,
+          result: [{ item_id: 42, sku: 'T000006945', name: 'Või', qty: 1, price: 2 }],
+        })));
+      const r = await client.addToCart('token123', 'T000006945', 1);
+      expect(r.ok).toBe(true);
+      expect(spy).toHaveBeenCalledTimes(4);
+    });
+
+    it('fails clearly when item still missing after retry', async () => {
+      vi.spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(new Response(JSON.stringify({ code: 200 })))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ code: 200, result: [] })))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ code: 200 })))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ code: 200, result: [] })));
+      const r = await client.addToCart('token123', 'T000006945', 1);
+      expect(r.ok).toBe(false);
+      expect(r.error).toMatch(/not persisted/i);
+    });
+
+    it('skips verify when item is present in cart after first add', async () => {
+      const spy = vi.spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(new Response(JSON.stringify({ code: 200 })))
+        .mockResolvedValueOnce(new Response(JSON.stringify({
+          code: 200,
+          result: [{ item_id: 1, sku: 'T000006945', name: 'Või', qty: 1, price: 2 }],
+        })));
+      const r = await client.addToCart('token123', 'T000006945', 1);
+      expect(r.ok).toBe(true);
+      expect(spy).toHaveBeenCalledTimes(2); // 1 update + 1 verify, no retry
     });
   });
 
