@@ -1,143 +1,79 @@
 ---
 name: selver-cart
-description: Use this skill when the user wants to shop at Selver.ee - search products, build a cart, and open it in the browser for checkout. Handles weight-based goods (kg products with weight_step) and coordinates selver-mcp + chrome-devtools-mcp so the cart actually appears in the browser ready for checkout.
+description: Use this skill when the user wants to shop at Estonian online grocery stores (Selver, Rimi, Barbora) - search products, compare prices across stores, build a cart in one or several stores, and open it in the browser for checkout. Coordinates selver-mcp with chrome-devtools-mcp. Handles weight-based goods (qty in kg, fixed steps).
 ---
 
-# Selver Cart Workflow
+# Grocery Cart Workflow (Selver, Rimi, Barbora)
 
-The user is shopping at Selver.ee (Estonian grocery chain). Two MCPs work together:
-- **`selver-mcp`** - builds the server-side guest cart via Selver's API
-- **`chrome-devtools-mcp`** - opens the cart in a real browser so the user can log in and check out
+Two MCPs work together:
 
-Neither MCP alone is enough. Always orchestrate both.
+- **`selver-mcp`** searches all stores and manages carts. Despite the name it covers `selver`, `rimi`, and `barbora`.
+- **`chrome-devtools-mcp`** shows the cart in a real browser so the user can log in and check out.
+
+Coop is not supported: its Tallinn, Tartu, and Pärnu e-shops run on Wolt and Bolt Food; only Haapsalu has its own web shop.
+
+## How carts differ per store
+
+| Store | Cart lives | What `add_to_cart` does | Login |
+|---|---|---|---|
+| `selver` | On Selver's server (guest cart held by the MCP) | Adds immediately; then run `get_browser_sync_script` to show it | At checkout only |
+| `rimi` | In the browser session | Resolves products and returns a script to run in the rimi.ee tab | Optional (guest cart works) |
+| `barbora` | In the logged-in browser session | Resolves products and returns a script to run in the barbora.ee tab | Required before the script works |
 
 ## When to use
 
-Trigger on any request like:
-- "Add X to my Selver cart"
-- "Find me some Y at Selver and buy them"
-- "Open my Selver cart"
-- "Osta Selverist..." (Estonian: shop from Selver)
+- "Lisa Selverist / Rimist / Barborast ... carti", "Osta ...", "Ava mu cart"
+- "Compile this list in Selver and Rimi and compare", "Kus on odavam?"
+- "Mis maksab X Selveris?"
 
 ## Workflow
 
 ### 1. Search
 
-Call `mcp__selver-mcp__search_products` with an Estonian query when possible (`leib`, `kana`, `kurk`, `piim`, `muna`).
+`search_products` with an **Estonian** term and `stores: [...]`. Default is Selver only; pass several stores to compare. Rimi names are abbreviated ("Br. rinnafil." = broileri rinnafilee). `sort: "price_asc"` for cheapest.
 
-Inspect the results. Note especially: `weight_step`.
+Each product carries `price`, `original_price`/`discount_pct`, `unit_price` + `unit_price_per`, `in_stock`, `category`, `nutrition` (Selver only), and the ordering rules `qty_step`, `min_qty`, `sold_by_weight`.
 
-### 2. Handle weight-based products
+### 2. Compare a whole list
 
-**If `weight_step` is not null** (e.g. cucumbers, tomatoes, meat sold by kg):
-- `qty` MUST be a multiple of `weight_step` (e.g. `weight_step: 0.3` → valid qty: 0.3, 0.6, 0.9, ...)
-- Integer qty will fail with "Toote samm on muutunud"
-- When the user says "one cucumber", translate to the smallest reasonable multiple (usually 1 * weight_step, or ask if a typical single item is larger)
+`compare_prices` with `items: [{query, qty}]` and `stores`. It returns top candidates per line per store with line totals and an estimated total per store. Check the candidates: the same query can match a 300 g pack in one store and a kg price in another. Then pick SKUs per store and call `add_to_cart` for each store the user wants.
 
-**If `weight_step` is null**: product is sold per-unit, use integer qty.
+### 3. Quantities
 
-### 3. Add to cart
+- `sold_by_weight: false`: pieces. `sold_by_weight: true`: **kg**, a multiple of `qty_step` (Selver 0.3, Rimi 0.3, Barbora 0.35 are common). The tools snap up and report `qty_adjusted`.
+- Rough weights: cucumber 0.3 kg, tomato 0.15 kg, banana 0.2 kg, chicken fillet pack 0.4 to 0.6 kg.
 
-Call `mcp__selver-mcp__add_to_cart` with the SKUs and correct qty.
+### 4. Add to cart
 
-Check the response:
-- Any items in `failed`? Read `error` - it now contains Selver's actual server message (e.g. step violations, stock issues).
-- If weight-step violation, retry with the correct multiple.
-- Save the `cart_token` - you'll need it to open the cart in the browser.
+`add_to_cart` with `store`, `items: [{sku, qty}]`.
 
-### 4. Open the cart in the browser (REQUIRED after any cart change)
+- **Selver** returns the server cart with the real `grand_total`. Then call `get_browser_sync_script` (store selver) and follow it: `new_page` on the cart URL, `evaluate_script` with `replay_script`. Verify `items` and `grand_total` in its return value.
+- **Rimi / Barbora** return `resolved`, `failed`, and `browser.script`. Follow `browser.steps`: open the store tab (`new_page`, or `select_page` if one exists), run `browser.script` with `evaluate_script`, then navigate to the cart URL in `browser.steps`. The script's return value is the truth: `ok`, `applied`, `cart.items`, `cart.total`. For Barbora, `login_required: true` means: tell the user to log in in that tab, wait, run the same script again. Never type the user's password.
 
-The user wants to SEE the cart. Server-side cart is not enough. Orchestrate via chrome-devtools-mcp:
+### 5. Changes later
 
-**Step A:** Open selver.ee (establishes the origin):
-```
-mcp__chrome-devtools__new_page url="https://www.selver.ee"
-```
+- Selver: `remove_from_cart` / `clear_cart` server-side, then rerun the sync script.
+- Rimi / Barbora: `remove_from_cart` / `clear_cart` return a script; run it in the store tab. `view_cart` with `store` returns a read-only script.
 
-**Step B:** Set the cart token in localStorage:
-```js
-localStorage.setItem('shop/cart/current-cart-token', JSON.stringify('<CART_TOKEN>'));
-```
-(via `mcp__chrome-devtools__evaluate_script`)
+### 6. Report
 
-**Step C:** Navigate to the cart page:
-```
-mcp__chrome-devtools__navigate_page type=url url="https://www.selver.ee/cart"
-```
+Per store: item list with quantities, total, fees to expect (Selver bag fee 0.50 €, Barbora 4 € under 39.99 €, Rimi minimum order 20 €), and which tab is open for checkout.
 
-**Step D:** Replay server items through the SPA's own add-to-cart flow (this is the critical step - without it, the SPA shows an empty cart even though the server has items).
+## Pitfalls
 
-**Important:** skip any SKU that's already in `cartItems`. Otherwise `cart/addItem` adds to the existing qty (e.g. cart shows 1.2 kg cucumber instead of 0.6) - because the SPA's add flow is "merge qty", not "replace". This matters both on fresh sessions (where the SPA's boot pull may have populated some items) and on subsequent `add_to_cart` calls to a browser that's already open.
+- **"Toote samm on muutunud (0.3)"** (Selver): qty not a multiple of the step; resend a multiple of `qty_step`.
+- **Cart empty in the browser**: the sync/apply script was skipped or ran before the page rendered. Run it again.
+- **Rimi script says no XSRF-TOKEN**: the tab is not on www.rimi.ee/epood or has not finished loading. Navigate there and rerun.
+- **Barbora login_required**: expected before login. The user logs in; you rerun.
+- **"Browser already running"** (chrome-devtools-mcp): use `list_pages`, or ask the user to run `pkill -f 'chrome-devtools-mcp/chrome-profile'`.
+- **Guest cart expired** (Selver): `add_to_cart` recreates it and sets `cart_recreated: true`; re-add earlier items.
 
-```js
-async () => {
-  const store = document.getElementById('app').__vue__.$store;
-  const token = JSON.parse(localStorage.getItem('shop/cart/current-cart-token'));
-  const res = await fetch(`/api/cart/pull?cartId=${token}&storeCode=et`);
-  const serverItems = (await res.json()).result;
+## Example
 
-  const added = [], skipped = [], mismatched = [];
-  for (const serverItem of serverItems) {
-    const existing = store.state.cart.cartItems.find(i => i.sku === serverItem.sku);
-    if (existing) {
-      if (Math.abs(existing.qty - serverItem.qty) > 1e-4) {
-        mismatched.push({ sku: serverItem.sku, client_qty: existing.qty, server_qty: serverItem.qty });
-      } else {
-        skipped.push(serverItem.sku);
-      }
-      continue;
-    }
-    const variant = await store.dispatch('cart/getProductVariant', { serverItem });
-    if (variant) {
-      await store.dispatch('cart/addItem', {
-        productToAdd: variant,
-        forceServerSilence: true,
-      });
-      added.push(serverItem.sku);
-    }
-  }
-  await store.dispatch('cart/syncTotals', { forceServerSync: true });
-  return { added, skipped, mismatched, total: store.state.cart.cartItems.length };
-}
-```
+User: "Pane kokku 2 kanafileed, kilo tomateid ja 2 täispiima nii Selveris kui Rimis ja ütle, kus odavam."
 
-The snippet returns `{added, skipped, mismatched}`. If `mismatched` is non-empty, the client and server disagree on qty for some SKU - usually means the server-side `add_to_cart` added more after the browser was already open. To reconcile: call `cart/updateItem` with the server qty, or let the user decide.
-
-Confirm the cart shows real products with correct prices. Tell the user to log in and check out.
-
-### 5. Keeping an open browser in sync
-
-If the browser is already open with items shown:
-
-**After calling `add_to_cart`** - replay only the newly added items through the snippet above.
-
-**After calling `remove_from_cart`** - also dispatch the SPA's removeItem in the browser, otherwise the removed items stay visible:
-
-```js
-async () => {
-  const store = document.getElementById('app').__vue__.$store;
-  const skusToRemove = ['<SKU1>', '<SKU2>'];
-  for (const sku of skusToRemove) {
-    const item = store.state.cart.cartItems.find(i => i.sku === sku);
-    if (item) await store.dispatch('cart/removeItem', { product: item });
-  }
-  return { remaining: store.state.cart.cartItems.length };
-}
-```
-
-## Common pitfalls
-
-- **"Toote samm on muutunud"** - qty is not a multiple of weight_step. Read the step from the error message (e.g. "(0.3)") and retry.
-- **Cart looks empty in browser** - Step D wasn't run, or was run too early (before the cart page loaded). Wait for the page to settle before the fetch.
-- **Cart shows items but qty controls spin** - items weren't added via `getProductVariant` + `addItem {forceServerSilence: true}`. Internal flags missing. Always use the canonical snippet.
-- **Chrome already running error** - if chrome-devtools-mcp complains about an existing browser instance, use `list_pages` to find the selver.ee tab and use `select_page` to work with it; don't call `new_page` again.
-
-## Example: full session
-
-User: "Add 2 loaves of bread and half a kg of cucumber to my Selver cart and open it."
-
-1. `search_products(query="leib")` - pick 2 loaves, note their SKUs.
-2. `search_products(query="kurk")` - pick a cucumber sold by kg, note `weight_step: 0.3`.
-3. `add_to_cart(items=[{sku: bread1, qty: 1}, {sku: bread2, qty: 1}, {sku: cucumber, qty: 0.6}])` - note `cart_token`.
-4. chrome-devtools-mcp: open selver.ee, set token in localStorage, navigate to /cart, run the replay snippet.
-5. Tell user: "Your Selver cart has 2 loaves of bread and 0.6 kg of cucumber (€X.XX total). The cart is open in your browser - log in to complete checkout."
+1. `compare_prices(items: [{query: "kanafilee", qty: 2}, {query: "tomat", qty: 1}, {query: "täispiim", qty: 2}], stores: ["selver", "rimi"], candidates: 3)`.
+2. Pick comparable products per store (same pack size), state both totals.
+3. `add_to_cart(store: "selver", items: [...])`, then `get_browser_sync_script(store: "selver")` and run it.
+4. `add_to_cart(store: "rimi", items: [...])`, open rimi.ee, run `browser.script`, navigate to the checkout URL.
+5. Reply with both carts, totals, and the fee notes.

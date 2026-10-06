@@ -1,0 +1,33 @@
+{
+  "code": 200,
+  "result": [
+    {
+      "item_id": 106876622,
+      "sku": "T000049036",
+      "qty": 0.6,
+      "name": "Pikk kurk, kg",
+      "price": 1.6048,
+      "product_type": "simple",
+      "quote_id": "TQQmqJZHsQ53czW471oDqkVGhYUCSWUU",
+      "extension_attributes": {
+        "tkg_do_not_replace": 1,
+        "is_fitlap": 0,
+        "product_order_method": 11903
+      }
+    },
+    {
+      "item_id": 106876623,
+      "sku": "T000085953",
+      "qty": 2,
+      "name": "Marineeritud kurk mesine, MÕISAPROUA, 500 g",
+      "price": 1.6049,
+      "product_type": "simple",
+      "quote_id": "TQQmqJZHsQ53czW471oDqkVGhYUCSWUU",
+      "extension_attributes": {
+        "tkg_do_not_replace": 0,
+        "is_fitlap": 0,
+        "product_order_method": 21
+      }
+    }
+  ]
+}

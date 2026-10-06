@@ -1,6 +1,6 @@
 {
   "name": "selver-mcp",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "MCP server for Selver.ee product search and cart management",
   "type": "module",
   "main": "dist/index.js",
@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "node-html-parser": "^9.0.4",
     "zod": "^4.3.6"
   },
   "devDependencies": {

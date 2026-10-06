@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "qTime": 23,
+    "responseCode": 200
+  },
+  "queryResults": [
+    {
+      "id": "q",
+      "meta": {
+        "qTime": 21,
+        "noOfResults": 5,
+        "totalResultsFound": 38,
+        "typeOfSearch": "AND",
+        "offset": 0,
+        "debuggingInformation": {},
+        "notificationCode": 1,
+        "searchedTerm": "kurk",
+        "apiKey": "klevu-14410928010151845",
+        "isPersonalised": false,
+        "tags": []
+      },
+      "records": [
+        {
+          "min_sale_qty": "0.3000",
+          "salePrice": "4.49",
+          "price": "4.49",
+          "name": "Kurk Luunja, GRÜNE FEE, kg",
+          "qty_increments": "0.3000",
+          "klevu_category": "KLEVU_PRODUCT;;e-Selver;Puu- ja köögiviljad;Köögiviljad, juurviljad  @ku@kuCategory@ku@",
+          "inStock": "yes",
+          "is_qty_decimal": "1",
+          "sku": "T000001325",
+          "url": "https://www.selver.ee/kurk-luunja-grune-fee-kg",
+          "typeOfRecord": "KLEVU_PRODUCT",
+          "basePrice": "4.49"
+        },
+        {
+          "min_sale_qty": "1.0000",
+          "salePrice": "2.79",
+          "price": "2.79",
+          "name": "Maitselt mahe kurk, SALVEST, 675 g",
+          "qty_increments": "0.0000",
+          "klevu_category": "KLEVU_PRODUCT;;e-Selver;Kuivained, hommikusöögid, hoidised;Hoidised;Hoidised  @ku@kuCategory@ku@",
+          "inStock": "yes",
+          "is_qty_decimal": "0",
+          "sku": "T000007887",
+          "url": "https://www.selver.ee/maitselt-mahe-kurk-salvest-675-g",
+          "typeOfRecord": "KLEVU_PRODUCT",
+          "basePrice": "2.79"
+        },
+        {
+          "min_sale_qty": "1.0000",
+          "salePrice": "2.69",
+          "price": "2.69",
+          "name": "Marineeritud kurk, SALVEST, 675 g",
+          "qty_increments": "0.0000",
+          "klevu_category": "KLEVU_PRODUCT;;e-Selver;Kuivained, hommikusöögid, hoidised;Hoidised;Hoidised  @ku@kuCategory@ku@",
+          "inStock": "yes",
+          "is_qty_decimal": "0",
+          "sku": "T000043022",
+          "url": "https://www.selver.ee/marineeritud-kurk-salvest-675-g",
+          "typeOfRecord": "KLEVU_PRODUCT",
+          "basePrice": "2.69"
+        },
+        {
+          "min_sale_qty": "1.0000",
+          "salePrice": "2.79",
+          "price": "2.79",
+          "name": "Magus kurk SALVEST, 675 g",
+          "qty_increments": "0.0000",
+          "klevu_category": "KLEVU_PRODUCT;;e-Selver;Kuivained, hommikusöögid, hoidised;Hoidised;Hoidised  @ku@kuCategory@ku@",
+          "inStock": "yes",
+          "is_qty_decimal": "0",
+          "sku": "T000007889",
+          "url": "https://www.selver.ee/magus-kurk-salvest-675-g",
+          "typeOfRecord": "KLEVU_PRODUCT",
+          "basePrice": "2.79"
+        },
+        {
+          "min_sale_qty": "1.0000",
+          "salePrice": "2.89",
+          "price": "2.89",
+          "name": "Maitselt mahe kurk, PÕLTSAMAA, neto 360g",
+          "qty_increments": "0.0000",
+          "klevu_category": "KLEVU_PRODUCT;;e-Selver;Kuivained, hommikusöögid, hoidised;Hoidised;Hoidised  @ku@kuCategory@ku@",
+          "inStock": "yes",
+          "is_qty_decimal": "0",
+          "sku": "T000069436",
+          "url": "https://www.selver.ee/maitselt-mahe-kurk-poltsamaa-neto-360g",
+          "typeOfRecord": "KLEVU_PRODUCT",
+          "basePrice": "2.89"
+        }
+      ],
+      "filters": []
+    }
+  ]
+}

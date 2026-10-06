@@ -1,0 +1,131 @@
+{
+  "code": 200,
+  "result": {
+    "grand_total": 5.67,
+    "base_grand_total": 5.67,
+    "subtotal": 4.1726,
+    "base_subtotal": 4.1726,
+    "discount_amount": 0,
+    "base_discount_amount": 0,
+    "subtotal_with_discount": 4.1726,
+    "base_subtotal_with_discount": 4.1726,
+    "shipping_amount": 0,
+    "base_shipping_amount": 0,
+    "shipping_discount_amount": 0,
+    "base_shipping_discount_amount": 0,
+    "tax_amount": 1.0942,
+    "base_tax_amount": 1.0942,
+    "weee_tax_applied_amount": null,
+    "shipping_tax_amount": 0,
+    "base_shipping_tax_amount": 0,
+    "subtotal_incl_tax": 5.17,
+    "shipping_incl_tax": 0,
+    "base_shipping_incl_tax": 0,
+    "base_currency_code": "EUR",
+    "quote_currency_code": "EUR",
+    "items_qty": 2,
+    "items": [
+      {
+        "item_id": 106876622,
+        "price": 1.6048,
+        "base_price": 1.6048,
+        "qty": 0.6,
+        "row_total": 0.9629,
+        "base_row_total": 0.9629,
+        "row_total_with_discount": 0,
+        "tax_amount": 0.2311,
+        "base_tax_amount": 0.2311,
+        "tax_percent": 24,
+        "discount_amount": 0,
+        "base_discount_amount": 0,
+        "discount_percent": 0,
+        "price_incl_tax": 1.99,
+        "base_price_incl_tax": 1.99,
+        "row_total_incl_tax": 1.19,
+        "base_row_total_incl_tax": 1.19,
+        "options": "[]",
+        "weee_tax_applied_amount": null,
+        "weee_tax_applied": null,
+        "name": "Pikk kurk, kg"
+      },
+      {
+        "item_id": 106876623,
+        "price": 1.6049,
+        "base_price": 1.6049,
+        "qty": 2,
+        "row_total": 3.2097,
+        "base_row_total": 3.2097,
+        "row_total_with_discount": 0,
+        "tax_amount": 0.7703,
+        "base_tax_amount": 0.7703,
+        "tax_percent": 24,
+        "discount_amount": 0,
+        "base_discount_amount": 0,
+        "discount_percent": 0,
+        "price_incl_tax": 1.99,
+        "base_price_incl_tax": 1.99,
+        "row_total_incl_tax": 3.98,
+        "base_row_total_incl_tax": 3.98,
+        "options": "[]",
+        "weee_tax_applied_amount": null,
+        "weee_tax_applied": null,
+        "name": "Marineeritud kurk mesine, MÕISAPROUA, 500 g"
+      }
+    ],
+    "total_segments": [
+      {
+        "code": "subtotal",
+        "title": "Vahesumma",
+        "value": 5.17,
+        "extension_attributes": {
+          "vmo_extra_data": "{\"value_incl_tax\":\"5.1700\",\"value_excl_tax\":\"4.1726\"}"
+        }
+      },
+      {
+        "code": "shipping",
+        "title": "Transporditasu",
+        "value": 0,
+        "extension_attributes": {
+          "vmo_extra_data": "{\"shipping_incl_tax\":\"0.0000\"}"
+        }
+      },
+      {
+        "code": "packaging",
+        "title": "Kilekott/paberkott",
+        "value": 0.5
+      },
+      {
+        "code": "tax",
+        "title": "Käibemaks",
+        "value": 1.0942,
+        "area": "taxes",
+        "extension_attributes": {
+          "tax_grandtotal_details": [
+            {
+              "amount": 1.0982,
+              "rates": [
+                {
+                  "percent": "24",
+                  "title": "KM 24%"
+                }
+              ],
+              "group_id": 1
+            }
+          ]
+        }
+      },
+      {
+        "code": "grand_total",
+        "title": "Summa käibemaksuga",
+        "value": 5.67,
+        "area": "footer"
+      }
+    ],
+    "extension_attributes": {
+      "coupon_codes": [],
+      "reward_points_balance": 0,
+      "reward_currency_amount": 0,
+      "base_reward_currency_amount": 0
+    }
+  }
+}

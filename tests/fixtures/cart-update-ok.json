@@ -1,0 +1,15 @@
+{
+  "code": 200,
+  "result": {
+    "item_id": 106876622,
+    "sku": "T000049036",
+    "qty": 0.6,
+    "name": "Pikk kurk, kg",
+    "price": 1.6048,
+    "product_type": "simple",
+    "quote_id": "7777182",
+    "extension_attributes": {
+      "product_order_method": 11903
+    }
+  }
+}

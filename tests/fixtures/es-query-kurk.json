@@ -1,0 +1,260 @@
+{
+  "took": 13,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 256,
+      "relation": "eq"
+    },
+    "max_score": 9.577308,
+    "hits": [
+      {
+        "_score": 9.577308,
+        "_source": {
+          "sku": "T000085953",
+          "name": "Marineeritud kurk mesine, MÕISAPROUA, 500 g",
+          "slug": "marineeritud-kurk-mesine-moisaproua-500-g-t000085953",
+          "url_path": "marineeritud-kurk-mesine-moisaproua-500-g-t000085953",
+          "price_incl_tax": 1.9899999999999998,
+          "final_price_incl_tax": 1.9899999999999998,
+          "original_price_incl_tax": 2.43,
+          "special_price_incl_tax": 1.9899999999999998,
+          "unit_price": 6.86,
+          "product_volume": "500 g",
+          "product_compare_unit": 75,
+          "product_brand": 5079,
+          "product_country_of_origin": 363,
+          "product_nutr_energy": "139.9kJ/33kcal",
+          "product_nutr_proteins": null,
+          "product_nutr_carbohydrates": "7.55",
+          "product_nutr_fats": null,
+          "product_nutr_salt": "1.60",
+          "product_nutr_sugars": "7.35",
+          "product_allergens": null,
+          "product_ingrediens": "Kurgid, joogivesi, suhkur, sool, happesuse regulaator: äädikhape, must terapipar, loorberileht, <bold><bold>SINEP</bold>ISEEMNED</bold>, vürtsid ja maitsetaimed.<br><br>* Toote koostisosade loetelu võib muutuda. Kontrollige enne toote tarbimist pakendil esitatud koostisosi.",
+          "product_age_restricted": false,
+          "product_replaceble": false,
+          "stock": {
+            "product_id": 33796,
+            "item_id": 21059289,
+            "stock_id": 1,
+            "qty": 0,
+            "is_in_stock": false,
+            "is_qty_decimal": false,
+            "use_config_min_qty": true,
+            "min_qty": 0,
+            "use_config_min_sale_qty": true,
+            "min_sale_qty": 1,
+            "use_config_max_sale_qty": true,
+            "max_sale_qty": 500,
+            "use_config_notify_stock_qty": true,
+            "notify_stock_qty": 0,
+            "use_config_qty_increments": true,
+            "backorders": false,
+            "use_config_backorders": true,
+            "qty_increments": 1,
+            "use_config_enable_qty_inc": true,
+            "enable_qty_increments": false,
+            "use_config_manage_stock": true,
+            "manage_stock": false,
+            "low_stock_date": null,
+            "stock_status": 1
+          },
+          "category": [
+            {
+              "category_id": 20,
+              "is_virtual": "false",
+              "position": 13501,
+              "name": "Hoidised",
+              "category_uid": "MjA="
+            },
+            {
+              "category_id": 20,
+              "is_virtual": "false",
+              "position": 99999,
+              "name": "Hoidised",
+              "category_uid": "MjA="
+            },
+            {
+              "name": "Hea hinnaga tooted",
+              "category_id": 348,
+              "is_virtual": true,
+              "position": 7666,
+              "category_uid": "MzQ4"
+            }
+          ],
+          "image": "/4/7/4745010129506.jpg",
+          "status": 1,
+          "visibility": 4
+        }
+      },
+      {
+        "_score": 9.452074,
+        "_source": {
+          "sku": "T000049036",
+          "name": "Pikk kurk, kg",
+          "slug": "pikk-kurk-kg",
+          "url_path": "pikk-kurk-kg",
+          "price_incl_tax": 1.9899999999999998,
+          "final_price_incl_tax": 1.9899999999999998,
+          "original_price_incl_tax": 2.29,
+          "special_price_incl_tax": 1.9899999999999998,
+          "unit_price": 1.99,
+          "product_volume": "kg",
+          "product_weight_step": "0.30",
+          "product_compare_unit": 75,
+          "product_brand": 450,
+          "product_country_of_origin": 679,
+          "product_nutr_energy": null,
+          "product_nutr_proteins": null,
+          "product_nutr_carbohydrates": null,
+          "product_nutr_fats": null,
+          "product_nutr_salt": null,
+          "product_nutr_sugars": null,
+          "product_allergens": null,
+          "product_ingrediens": null,
+          "product_age_restricted": false,
+          "product_replaceble": true,
+          "stock": {
+            "product_id": 36252,
+            "item_id": 24197709,
+            "stock_id": 1,
+            "qty": 0,
+            "is_in_stock": false,
+            "is_qty_decimal": true,
+            "use_config_min_qty": true,
+            "min_qty": 0,
+            "use_config_min_sale_qty": false,
+            "min_sale_qty": 0.3,
+            "use_config_max_sale_qty": true,
+            "max_sale_qty": 500,
+            "use_config_notify_stock_qty": true,
+            "notify_stock_qty": 0,
+            "use_config_qty_increments": false,
+            "backorders": false,
+            "use_config_backorders": true,
+            "qty_increments": 0.3,
+            "use_config_enable_qty_inc": false,
+            "enable_qty_increments": true,
+            "use_config_manage_stock": true,
+            "manage_stock": false,
+            "low_stock_date": null,
+            "stock_status": 1
+          },
+          "category": [
+            {
+              "category_id": 213,
+              "is_virtual": "false",
+              "position": 99999,
+              "name": "Köögiviljad, juurviljad",
+              "category_uid": "MjEz"
+            },
+            {
+              "name": "Hea hinnaga tooted",
+              "category_id": 348,
+              "is_virtual": true,
+              "position": 5210,
+              "category_uid": "MzQ4"
+            },
+            {
+              "name": "Soodushinnaga toidukaubad",
+              "category_id": 366,
+              "is_virtual": true,
+              "position": 5177,
+              "category_uid": "MzY2"
+            }
+          ],
+          "image": "/2/7/2711874000000.jpg",
+          "status": 1,
+          "visibility": 4
+        }
+      },
+      {
+        "_score": 9.370389,
+        "_source": {
+          "sku": "T000007888",
+          "name": "Maitselt mahe kurk, SALVEST, 1,6 kg",
+          "slug": "maitselt-mahe-kurk-salvest-1-6-kg",
+          "url_path": "maitselt-mahe-kurk-salvest-1-6-kg",
+          "price_incl_tax": 4.99,
+          "final_price_incl_tax": 4.99,
+          "original_price_incl_tax": 4.99,
+          "special_price_incl_tax": 0,
+          "unit_price": 5.87,
+          "product_volume": "850 g neto",
+          "product_compare_unit": 75,
+          "product_brand": 2662,
+          "product_country_of_origin": 22,
+          "product_nutr_energy": "58.6kJ/14kcal",
+          "product_nutr_proteins": "0.00",
+          "product_nutr_carbohydrates": "2.70",
+          "product_nutr_fats": "0.00",
+          "product_nutr_salt": "1.60",
+          "product_nutr_sugars": "2.20",
+          "product_allergens": null,
+          "product_ingrediens": "Kurk, sool, till, suhkur, happesuse regulaator äädikhape, <bold><bold>SINEP</bold>ISEEMNED</bold><br><br>* Toote koostisosade loetelu võib muutuda. Kontrollige enne toote tarbimist pakendil esitatud koostisosi.",
+          "product_age_restricted": false,
+          "product_replaceble": false,
+          "stock": {
+            "product_id": 5054,
+            "item_id": 5054,
+            "stock_id": 1,
+            "qty": 0,
+            "is_in_stock": false,
+            "is_qty_decimal": false,
+            "use_config_min_qty": true,
+            "min_qty": 0,
+            "use_config_min_sale_qty": true,
+            "min_sale_qty": 1,
+            "use_config_max_sale_qty": true,
+            "max_sale_qty": 500,
+            "use_config_notify_stock_qty": true,
+            "notify_stock_qty": 0,
+            "use_config_qty_increments": true,
+            "backorders": false,
+            "use_config_backorders": true,
+            "qty_increments": 1,
+            "use_config_enable_qty_inc": true,
+            "enable_qty_increments": false,
+            "use_config_manage_stock": true,
+            "manage_stock": false,
+            "low_stock_date": null,
+            "stock_status": 1
+          },
+          "category": [
+            {
+              "category_id": 20,
+              "is_virtual": "false",
+              "position": 10344,
+              "name": "Hoidised",
+              "category_uid": "MjA="
+            },
+            {
+              "category_id": 20,
+              "is_virtual": "false",
+              "position": 99999,
+              "name": "Hoidised",
+              "category_uid": "MjA="
+            },
+            {
+              "name": "FB",
+              "category_id": 427,
+              "is_virtual": true,
+              "position": 36424,
+              "category_uid": "NDI3"
+            }
+          ],
+          "image": "/4/7/4740073060353.jpg",
+          "status": 1,
+          "visibility": 4
+        }
+      }
+    ]
+  }
+}
