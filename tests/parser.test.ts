@@ -31,7 +31,13 @@ describe('parseNutrition', () => {
     expect(parseNutrition({
       product_nutr_energy: '811.7kJ/194kcal', product_nutr_proteins: '9.10', product_nutr_carbohydrates: '24.10',
       product_nutr_fats: '6.30', product_nutr_sugars: '1,2', product_nutr_salt: '0.5',
-    })).toEqual({ energy_kcal: 194, protein_g: 9.1, carbs_g: 24.1, fat_g: 6.3, sugars_g: 1.2, salt_g: 0.5 });
+    })).toEqual({ per: null, energy_kcal: 194, protein_g: 9.1, carbs_g: 24.1, fat_g: 6.3, saturated_fat_g: null, sugars_g: 1.2, fibre_g: null, salt_g: 0.5 });
+  });
+  it('adds saturated fat and the per-100 unit when known', () => {
+    const n = parseNutrition({ product_nutr_energy: '284.5kJ/68kcal', product_nutr_proteins: '3.30', product_nutr_fats: '3.90', product_nutr_fats_acids: '2.60' }, ' 100 milliliitri kohta');
+    expect(n?.per).toBe('100ml');
+    expect(n?.saturated_fat_g).toBe(2.6);
+    expect(parseNutrition({ product_nutr_proteins: '1' }, '100 grammi kohta')?.per).toBe('100g');
   });
   it('returns null when nothing is provided', () => {
     expect(parseNutrition({ product_nutr_energy: null, product_nutr_proteins: null, product_nutr_carbohydrates: null, product_nutr_fats: null })).toBeNull();

@@ -1,8 +1,13 @@
 import type { Product, SearchResult, SearchSort, StoreAdapter, BrowserCartApi, BrowserCartOp, BrowserCartInstructions } from '../../core/types.js';
-import { parseRimiSearchHtml, RIMI_BASE } from './parser.js';
+import { parseRimiSearchHtml, parseRimiProductPage, RIMI_BASE } from './parser.js';
 import { politeGetText } from '../../core/http.js';
 
 export const RIMI_MAX_PAGE = 80;
+
+/** /epood/ee/tooted/p/{code} redirects to the canonical product URL; fetch follows it. */
+async function fetchProductPage(url: string): Promise<string> {
+  return politeGetText(url, { concurrency: 4, retries: 2, validate: t => t.includes('product_details_page') || t.includes('js-product-container') });
+}
 
 async function fetchSearchHtml(query: string): Promise<string> {
   const url = `${RIMI_BASE}/epood/ee/otsing?query=${encodeURIComponent(query)}&page=1&pageSize=${RIMI_MAX_PAGE}`;
@@ -31,9 +36,20 @@ export class RimiClient implements StoreAdapter {
     return { store: 'rimi', query, source: 'rimi-html', total: products.length, products: products.slice(0, Math.max(1, Math.min(limit, RIMI_MAX_PAGE))) };
   }
 
-  /** Rimi has no JSON product endpoint; searching by product code returns exactly that product. */
+  /**
+   * Rimi has no JSON product endpoint. The product page carries the same card as search plus
+   * nutrition, ingredients, origin and alcohol %; when it cannot be read, a search by product code
+   * still gives price and stock.
+   */
   async getProducts(skus: string[]): Promise<Product[]> {
     const results = await Promise.all(skus.map(async sku => {
+      try {
+        const page = await fetchProductPage(`${RIMI_BASE}/epood/ee/tooted/p/${encodeURIComponent(sku)}`);
+        const product = parseRimiProductPage(page, sku);
+        if (product) return product;
+      } catch {
+        // fall back to search below
+      }
       try {
         const html = await fetchSearchHtml(sku);
         return parseRimiSearchHtml(html).find(p => p.sku === sku) ?? null;
@@ -42,6 +58,18 @@ export class RimiClient implements StoreAdapter {
       }
     }));
     return results.filter((p): p is Product => p !== null);
+  }
+
+  /** Search cards carry no nutrition; read each product's page (throttled per host). */
+  async enrichDetails(products: Product[]): Promise<Product[]> {
+    return Promise.all(products.map(async p => {
+      if (p.details) return p;
+      try {
+        return parseRimiProductPage(await fetchProductPage(p.url), p.sku) ?? p;
+      } catch {
+        return p;
+      }
+    }));
   }
 
   readonly cart: BrowserCartApi = {

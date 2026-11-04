@@ -75,6 +75,10 @@ export function barboraToProduct(raw: BarboraRaw): Product {
     nutrition: null,
     allergens: null,
     age_restricted: Boolean(raw.is_adult),
+    alcohol: null,
+    dietary: [],
+    brand: raw.brand_name?.trim() || null,
+    country_of_origin: null,
     url: raw.Url ? `${BARBORA_BASE}/toode/${raw.Url}` : `${BARBORA_BASE}/otsing?q=${encodeURIComponent(raw.id)}`,
   };
 }

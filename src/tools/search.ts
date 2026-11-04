@@ -10,9 +10,19 @@ const json = (value: unknown) => ({ content: [{ type: 'text' as const, text: JSO
 const storeEnum = z.enum(STORE_IDS);
 const storesParam = z.array(storeEnum).min(1).default(['selver']).describe(`Stores to query: ${STORE_IDS.join(', ')}`);
 
-async function searchStore(store: StoreId, query: string, limit: number, sort: 'relevance' | 'price_asc' | 'price_desc'): Promise<SearchResult | { store: StoreId; query: string; error: string }> {
+/** Drop the long `details` block so ordinary searches stay compact. */
+function withoutDetails(p: Product): Product {
+  if (!p.details) return p;
+  const { details: _details, ...rest } = p;
+  return rest;
+}
+
+async function searchStore(store: StoreId, query: string, limit: number, sort: 'relevance' | 'price_asc' | 'price_desc', details = false): Promise<SearchResult | { store: StoreId; query: string; error: string }> {
   try {
-    return await getStore(store).searchProducts(query, limit, sort);
+    const adapter = getStore(store);
+    const r = await adapter.searchProducts(query, limit, sort);
+    if (!details) return { ...r, products: r.products.map(withoutDetails) };
+    return adapter.enrichDetails ? { ...r, products: await adapter.enrichDetails(r.products) } : r;
   } catch (e) {
     return { store, query, error: (e as Error).message };
   }
@@ -28,17 +38,22 @@ export function registerSearchTools(server: McpServer): void {
         'Use Estonian terms (kurk, kanafilee, kreeka jogurt, täispiim); English words find almost nothing.',
         'Each product includes price (incl. VAT), discount, unit price, live in_stock, and ordering rules:',
         'qty_step and min_qty. For sold_by_weight items qty is in kg and must be a multiple of qty_step (e.g. 0.3, 0.6).',
-        'Nutrition is per 100 g when the shop provides it.',
+        'Nutrition is per 100 g or 100 ml (see nutrition.per) and includes saturated fat where the shop lists it.',
+        'Selver also returns alcohol (abv_pct and type), dietary tags (vegan, gluten_free, lactose_free, sugar_free, no_added_sugar, organic),',
+        'brand, country_of_origin and allergens marked in the ingredient list. Rimi and Barbora search pages carry no nutrition:',
+        'pass details: true (Rimi reads each product page) or call get_products for chosen SKUs.',
+        'details: true adds ingredients, allergens_marked, warnings, storage, manufacturer, description and EAN.',
       ].join(' '),
       inputSchema: {
         query: z.string().min(1).describe('Search term, Estonian preferred'),
         stores: storesParam,
         limit: z.number().int().min(1).max(MAX_SEARCH_LIMIT).default(15).describe(`Max results per store (1-${MAX_SEARCH_LIMIT}, default 15)`),
         sort: z.enum(['relevance', 'price_asc', 'price_desc']).default('relevance').describe('Result order'),
+        details: z.boolean().default(false).describe('Include ingredients, marked allergens, warnings, storage, maker and EAN (and, for Rimi, nutrition). Rimi needs one extra page per result, so keep limit small.'),
       },
     },
-    async ({ query, stores, limit, sort }) => {
-      const results = await Promise.all(stores.map(s => searchStore(s, query, limit, sort)));
+    async ({ query, stores, limit, sort, details }) => {
+      const results = await Promise.all(stores.map(s => searchStore(s, query, limit, sort, details)));
       if (results.length === 1) return json(results[0]);
       return json({ query, results });
     },
@@ -48,7 +63,11 @@ export function registerSearchTools(server: McpServer): void {
     'get_products',
     {
       title: 'Get products by SKU',
-      description: 'Fetch full product details (price, stock, qty rules, nutrition) for known SKUs of one store, e.g. to re-check items before adding them.',
+      description: [
+        'Fetch full product records for known SKUs of one store: price, stock, qty rules, nutrition (incl. saturated fat),',
+        'alcohol %, dietary tags, brand, origin, and details (ingredients, allergens marked in them, warnings, storage, manufacturer, EAN).',
+        'Selver from its catalog; Rimi from each product page. Use it to check nutrition or allergens, or to re-check items before adding them.',
+      ].join(' '),
       inputSchema: {
         store: storeEnum.default('selver'),
         skus: z.array(z.string().min(1)).min(1).max(50).describe('Product SKUs, e.g. ["T000049036"]'),

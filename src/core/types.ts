@@ -4,12 +4,49 @@ export const STORE_IDS = ['selver', 'rimi', 'barbora'] as const;
 export type StoreId = typeof STORE_IDS[number];
 
 export interface NutritionPer100g {
+  /** What the values are per: 100 g or 100 ml. null when the store does not say. */
+  per: '100g' | '100ml' | null;
   energy_kcal: number;
   protein_g: number;
   carbs_g: number;
   fat_g: number;
+  /** "millest küllastunud rasvhapped". null when the store does not list it. */
+  saturated_fat_g: number | null;
   sugars_g: number;
+  /** Dietary fibre. null when the store does not list it (Selver never does). */
+  fibre_g: number | null;
   salt_g: number;
+}
+
+export interface AlcoholInfo {
+  /** Alcohol by volume in percent; 0 for alcohol-free variants; null when only the type is known. */
+  abv_pct: number | null;
+  /** Store's own label, e.g. "Hele õlu 6,7%". null when the store gives only a percentage. */
+  type: string | null;
+}
+
+/** Machine-friendly dietary tags, mapped from each store's own labels. */
+export type DietaryTag = 'vegan' | 'gluten_free' | 'lactose_free' | 'sugar_free' | 'no_added_sugar' | 'organic';
+
+/**
+ * Longer product information. Returned by get_products, and by search_products only with details: true,
+ * so that ordinary searches stay compact.
+ */
+export interface ProductDetails {
+  /** Ingredient list as plain text (store markup and boilerplate disclaimers removed). */
+  ingredients: string | null;
+  /**
+   * Words the store marks as allergens inside the ingredient list (bold or CAPITALS, as EU labelling requires).
+   * Heuristic: always tell the user to check the package.
+   */
+  allergens_marked: string[];
+  /** Extra nutrition lines such as vitamins and minerals, e.g. "Kaltsium 121 mg (15%*)". */
+  nutrition_extra: string | null;
+  warnings: string | null;
+  storage: string | null;
+  manufacturer: string | null;
+  description: string | null;
+  ean: string | null;
 }
 
 export type UnitPricePer = 'kg' | 'l' | 'tk';
@@ -35,9 +72,19 @@ export interface Product {
   in_stock: boolean | null;
   category: string | null;
   nutrition: NutritionPer100g | null;
+  /**
+   * The store's allergen field; when that is empty, the allergen words marked in the ingredient list
+   * (see details.allergens_marked), comma-separated. null when neither is known.
+   */
   allergens: string | null;
   age_restricted: boolean;
+  /** Set for alcoholic drinks when the store says so (Selver alcohol type, Rimi product page). */
+  alcohol: AlcoholInfo | null;
+  dietary: DietaryTag[];
+  brand: string | null;
+  country_of_origin: string | null;
   url: string;
+  details?: ProductDetails;
 }
 
 export type SearchSort = 'relevance' | 'price_asc' | 'price_desc';
@@ -157,7 +204,13 @@ export interface StoreAdapter {
   homeUrl: string;
   cartUrl: string;
   searchProducts(query: string, limit?: number, sort?: SearchSort): Promise<SearchResult>;
+  /** Products by SKU, including details. */
   getProducts(skus: string[]): Promise<Product[]>;
+  /**
+   * Fill in `details` (and nutrition etc.) for search results that do not carry them yet.
+   * Optional: stores whose search already returns full records (Selver) do not need it.
+   */
+  enrichDetails?(products: Product[]): Promise<Product[]>;
   cart: ServerCartApi | BrowserCartApi;
   /** Store-specific data a browser op needs for a SKU (looked up from the adapter's cache). */
   opMeta?(sku: string): Record<string, unknown> | undefined;

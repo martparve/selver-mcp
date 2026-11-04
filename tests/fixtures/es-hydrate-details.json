@@ -1,0 +1,471 @@
+{
+ "hits": {
+  "total": {
+   "value": 5
+  },
+  "hits": [
+   {
+    "_source": {
+     "sku": "T000078761",
+     "name": "Taimsed nagitsad, THORMI, 200g",
+     "slug": "taimsed-nagitsad-thormi-200g",
+     "url_path": "taimsed-nagitsad-thormi-200g",
+     "price_incl_tax": 5.1899999999999995,
+     "final_price_incl_tax": 5.1899999999999995,
+     "original_price_incl_tax": 5.1899999999999995,
+     "unit_price": 25.95,
+     "product_volume": "200 g",
+     "product_weight_step": null,
+     "product_age_restricted": false,
+     "product_allergens": null,
+     "product_ingrediens": "Vesi, hernevalk, <bold><bold>KAER</bold>A</bold>valk, päikesekuivatatud tomat (9,6%), rapsiõli, kartulitärklis, tšilli, metüültselluloos, karrageen, pärmiekstrakt, sibul, küüslauk, happesuse regulaator (äädikhape), peedipulber, paprikapulber, sool, rikastatud inaktiivne pärm (raud, niatsiin (vitamiin B3), pantoteenhape (B5), B6, tiamiin (B1), riboflaviin (B2), foolhape (B9), biotiin (B7), B12), oregano, must pipar.<br><br>* Toote koostisosade loetelu võib muutuda. Kontrollige enne toote tarbimist pakendil esitatud koostisosi.",
+     "product_nutr_energy": "815.9kJ/195kcal",
+     "product_nutr_proteins": "13.40",
+     "product_nutr_carbohydrates": "13.30",
+     "product_nutr_fats": "9.30",
+     "product_nutr_fats_acids": "1.20",
+     "product_nutr_sugars": "0.60",
+     "product_nutr_salt": "1.10",
+     "product_nutr_unit": 20,
+     "product_nutr_info": null,
+     "product_alcohol_type": null,
+     "product_dietary_info": [
+      1085
+     ],
+     "product_country_of_origin": 22,
+     "product_brand": 8662,
+     "product_manufacturer": 8661,
+     "product_main_ean": "4745010359132",
+     "product_warnings": null,
+     "product_storage_cond_use": "Säilitada temperatuuril +2…+6°C",
+     "description": "Thormi herne- ja kaeravalgust taimsed nagitsad.",
+     "category": [
+      {
+       "category_id": 225,
+       "is_virtual": "false",
+       "position": 9720,
+       "name": "Muud lihatooted",
+       "category_uid": "MjI1"
+      },
+      {
+       "category_id": 225,
+       "is_virtual": "false",
+       "position": 99999,
+       "name": "Muud lihatooted",
+       "category_uid": "MjI1"
+      },
+      {
+       "name": "Vegan",
+       "category_id": 355,
+       "is_virtual": true,
+       "position": 12118,
+       "category_uid": "MzU1"
+      },
+      {
+       "name": "FB",
+       "category_id": 427,
+       "is_virtual": true,
+       "position": 12275,
+       "category_uid": "NDI3"
+      }
+     ],
+     "stock": {
+      "product_id": 29695,
+      "item_id": 17252249,
+      "stock_id": 1,
+      "qty": 0,
+      "is_in_stock": false,
+      "is_qty_decimal": false,
+      "use_config_min_qty": true,
+      "min_qty": 0,
+      "use_config_min_sale_qty": true,
+      "min_sale_qty": 1,
+      "use_config_max_sale_qty": true,
+      "max_sale_qty": 500,
+      "use_config_notify_stock_qty": true,
+      "notify_stock_qty": 0,
+      "use_config_qty_increments": true,
+      "backorders": false,
+      "use_config_backorders": true,
+      "qty_increments": 1,
+      "use_config_enable_qty_inc": true,
+      "enable_qty_increments": false,
+      "use_config_manage_stock": true,
+      "manage_stock": false,
+      "low_stock_date": null,
+      "stock_status": 1
+     }
+    }
+   },
+   {
+    "_source": {
+     "sku": "T000034837",
+     "name": "Täispiim 3,6%-4,2% pure, FARMI, 1 L",
+     "slug": "taispiim-3-6-4-2-pure-farmi-1-l",
+     "url_path": "taispiim-3-6-4-2-pure-farmi-1-l",
+     "price_incl_tax": 1.65,
+     "final_price_incl_tax": 1.65,
+     "original_price_incl_tax": 1.65,
+     "unit_price": 1.65,
+     "product_volume": "1 l",
+     "product_weight_step": null,
+     "product_age_restricted": false,
+     "product_allergens": null,
+     "product_ingrediens": "Pastöriseeritud <bold>PIIM</bold><br><br>* Toote koostisosade loetelu võib muutuda. Kontrollige enne toote tarbimist pakendil esitatud koostisosi.",
+     "product_nutr_energy": "284.5kJ/68kcal",
+     "product_nutr_proteins": "3.30",
+     "product_nutr_carbohydrates": "4.80",
+     "product_nutr_fats": "3.90",
+     "product_nutr_fats_acids": "2.60",
+     "product_nutr_sugars": "4.80",
+     "product_nutr_salt": "0.11",
+     "product_nutr_unit": 1004,
+     "product_nutr_info": null,
+     "product_alcohol_type": null,
+     "product_dietary_info": [],
+     "product_country_of_origin": 22,
+     "product_brand": 2752,
+     "product_manufacturer": 2751,
+     "product_main_ean": "4740113090555",
+     "product_warnings": null,
+     "product_storage_cond_use": "Säilitada temperatuuril +2ºC…+6ºC.",
+     "description": "Farmi ​täispiimad on kogu pere lemmikud. Talvekuudel toetab Farmi piim Eesti suusatajaid,  suvekuudeks saavad  täispiimad suviselt helge välimuse. ​Pakendil kujutatud taimed on enimlevinud rohumaade kõrrelised ja niidutaimed, millest sünnib Eestimaa suvine piim. ",
+     "category": [
+      {
+       "category_id": 234,
+       "is_virtual": "false",
+       "position": 40,
+       "name": "Piimad, koored",
+       "category_uid": "MjM0"
+      },
+      {
+       "category_id": 234,
+       "is_virtual": "false",
+       "position": 99999,
+       "name": "Piimad, koored",
+       "category_uid": "MjM0"
+      },
+      {
+       "name": "FB",
+       "category_id": 427,
+       "is_virtual": true,
+       "position": 33190,
+       "category_uid": "NDI3"
+      }
+     ],
+     "stock": {
+      "product_id": 8780,
+      "item_id": 8780,
+      "stock_id": 1,
+      "qty": 0,
+      "is_in_stock": false,
+      "is_qty_decimal": false,
+      "use_config_min_qty": true,
+      "min_qty": 0,
+      "use_config_min_sale_qty": true,
+      "min_sale_qty": 1,
+      "use_config_max_sale_qty": true,
+      "max_sale_qty": 500,
+      "use_config_notify_stock_qty": true,
+      "notify_stock_qty": 0,
+      "use_config_qty_increments": true,
+      "backorders": false,
+      "use_config_backorders": true,
+      "qty_increments": 1,
+      "use_config_enable_qty_inc": true,
+      "enable_qty_increments": false,
+      "use_config_manage_stock": true,
+      "manage_stock": false,
+      "low_stock_date": null,
+      "stock_status": 1
+     }
+    }
+   },
+   {
+    "_source": {
+     "sku": "T000046090",
+     "name": "Õlu Blonde, GRIMBERGEN, 500 ml purk",
+     "slug": "olu-blonde-grimbergen-500-ml-purk",
+     "url_path": "olu-blonde-grimbergen-500-ml-purk",
+     "price_incl_tax": 2.59,
+     "final_price_incl_tax": 2.59,
+     "original_price_incl_tax": 2.59,
+     "unit_price": 5.18,
+     "product_volume": "500 ml purk",
+     "product_weight_step": null,
+     "product_age_restricted": true,
+     "product_allergens": null,
+     "product_ingrediens": "Vesi, <bold>ODRA</bold>linnased, glükoosisiirup, <bold>NISU</bold>linnased, karamelliseeritud suhkur, toiduvärv - E150c, humalaekstrakt<br><br>* Toote koostisosade loetelu võib muutuda. Kontrollige enne toote tarbimist pakendil esitatud koostisosi.",
+     "product_nutr_energy": "209.2kJ/50kcal",
+     "product_nutr_proteins": "0.50",
+     "product_nutr_carbohydrates": "3.00",
+     "product_nutr_fats": "0.10",
+     "product_nutr_fats_acids": null,
+     "product_nutr_sugars": "0.20",
+     "product_nutr_salt": null,
+     "product_nutr_unit": 20,
+     "product_nutr_info": null,
+     "product_alcohol_type": 5231,
+     "product_dietary_info": [],
+     "product_country_of_origin": 70,
+     "product_brand": 7403,
+     "product_manufacturer": 2506,
+     "product_main_ean": "4770349231378",
+     "product_warnings": "Tähelepanu! Tegemist on alkoholiga. Alkohol võib kahjustada teie tervist!",
+     "product_storage_cond_use": "Hoida jahedas ja kuivas kohas, mitte hoida otsese päikese käes. Jooge jahutatult.",
+     "description": "Grimbergen Blonde õlu<br>",
+     "category": [
+      {
+       "category_id": 30,
+       "is_virtual": "false",
+       "position": 3547,
+       "name": "Õlled, siidrid, segud, kokteilid",
+       "category_uid": "MzA="
+      },
+      {
+       "category_id": 30,
+       "is_virtual": "false",
+       "position": 99999,
+       "name": "Õlled, siidrid, segud, kokteilid",
+       "category_uid": "MzA="
+      },
+      {
+       "name": "FB",
+       "category_id": 427,
+       "is_virtual": true,
+       "position": 29920,
+       "category_uid": "NDI3"
+      }
+     ],
+     "stock": {
+      "product_id": 12050,
+      "item_id": 30819,
+      "stock_id": 1,
+      "qty": 0,
+      "is_in_stock": false,
+      "is_qty_decimal": false,
+      "use_config_min_qty": true,
+      "min_qty": 0,
+      "use_config_min_sale_qty": true,
+      "min_sale_qty": 1,
+      "use_config_max_sale_qty": true,
+      "max_sale_qty": 500,
+      "use_config_notify_stock_qty": true,
+      "notify_stock_qty": 0,
+      "use_config_qty_increments": true,
+      "backorders": false,
+      "use_config_backorders": true,
+      "qty_increments": 1,
+      "use_config_enable_qty_inc": true,
+      "enable_qty_increments": false,
+      "use_config_manage_stock": true,
+      "manage_stock": false,
+      "low_stock_date": null,
+      "stock_status": 1
+     }
+    }
+   },
+   {
+    "_source": {
+     "sku": "T000090915",
+     "name": "Kreeka jogurt 5%, FAGE, 150 g",
+     "slug": "kreeka-jogurt-5-fage-150-g",
+     "url_path": "kreeka-jogurt-5-fage-150-g",
+     "price_incl_tax": 2.39,
+     "final_price_incl_tax": 2.39,
+     "original_price_incl_tax": 2.39,
+     "unit_price": 15.93,
+     "product_volume": "150 g",
+     "product_weight_step": null,
+     "product_age_restricted": false,
+     "product_allergens": null,
+     "product_ingrediens": "<bold>LÕSS</bold>, PIIMAvahu­koor, elusad <bold>JOGURT</bold>ibakterid (<bold>LÕSS</bold>). <bold>PIIMA</bold> päritolu: EU.<br><br>* Toote koostisosade loetelu võib muutuda. Kontrollige enne toote tarbimist pakendil esitatud koostisosi.",
+     "product_nutr_energy": "389.1kJ/93kcal",
+     "product_nutr_proteins": "9.00",
+     "product_nutr_carbohydrates": "3.00",
+     "product_nutr_fats": "5.00",
+     "product_nutr_fats_acids": "3.60",
+     "product_nutr_sugars": "3.00",
+     "product_nutr_salt": "0.10",
+     "product_nutr_unit": 20,
+     "product_nutr_info": "Kaltsium 121 mg (15%*) *toitainete viitväärtustest",
+     "product_alcohol_type": null,
+     "product_dietary_info": [],
+     "product_country_of_origin": 811,
+     "product_brand": 10450,
+     "product_manufacturer": 505,
+     "product_main_ean": "5201054018330",
+     "product_warnings": null,
+     "product_storage_cond_use": "Temp +1..+6 °C",
+     "description": "Kreeka stiilis nõrutatud jogurt.",
+     "category": [
+      {
+       "category_id": 236,
+       "is_virtual": "false",
+       "position": 99999,
+       "name": "Jogurtid, jogurtijoogid",
+       "category_uid": "MjM2"
+      },
+      {
+       "name": "FB",
+       "category_id": 427,
+       "is_virtual": true,
+       "position": 3485,
+       "category_uid": "NDI3"
+      }
+     ],
+     "stock": {
+      "product_id": 38485,
+      "item_id": 29705551,
+      "stock_id": 1,
+      "qty": 0,
+      "is_in_stock": false,
+      "is_qty_decimal": false,
+      "use_config_min_qty": true,
+      "min_qty": 0,
+      "use_config_min_sale_qty": true,
+      "min_sale_qty": 1,
+      "use_config_max_sale_qty": true,
+      "max_sale_qty": 500,
+      "use_config_notify_stock_qty": true,
+      "notify_stock_qty": 0,
+      "use_config_qty_increments": true,
+      "backorders": false,
+      "use_config_backorders": true,
+      "qty_increments": 1,
+      "use_config_enable_qty_inc": true,
+      "enable_qty_increments": false,
+      "use_config_manage_stock": true,
+      "manage_stock": false,
+      "low_stock_date": null,
+      "stock_status": 1
+     }
+    }
+   },
+   {
+    "_source": {
+     "sku": "T000031660",
+     "name": "Mandlijook magustamata laktoosivaba, ALPRO, 1 l",
+     "slug": "mandlijook-magustamata-laktoosivaba-alpro-1-l",
+     "url_path": "mandlijook-magustamata-laktoosivaba-alpro-1-l",
+     "price_incl_tax": 3.59,
+     "final_price_incl_tax": 3.59,
+     "original_price_incl_tax": 3.59,
+     "unit_price": 3.59,
+     "product_volume": "1 l",
+     "product_weight_step": null,
+     "product_age_restricted": false,
+     "product_allergens": null,
+     "product_ingrediens": "Vesi, <bold>MANDEL</bold>(2,3%), kaltsium (kaltsiumkarbonaat), meresool, stabilisaatorid (guarkummi, gellankummi), emulgaator (letsitiinid), looduslikud lõhna- ja maitseaine, vitamiinid (B12, D2, E)<br><br>* Toote koostisosade loetelu võib muutuda. Kontrollige enne toote tarbimist pakendil esitatud koostisosi.",
+     "product_nutr_energy": "62.8kJ/15kcal",
+     "product_nutr_proteins": "0.50",
+     "product_nutr_carbohydrates": "0.00",
+     "product_nutr_fats": "1.10",
+     "product_nutr_fats_acids": "0.10",
+     "product_nutr_sugars": "0.00",
+     "product_nutr_salt": "0.15",
+     "product_nutr_unit": 1004,
+     "product_nutr_info": "Vitamiin D (μg): 0,8; Vitamiin E (mg): 1,8; Vitamiin B12 (μg): 0,4;",
+     "product_alcohol_type": null,
+     "product_dietary_info": [
+      2081,
+      1809,
+      1085,
+      2088
+     ],
+     "product_country_of_origin": 83,
+     "product_brand": 3455,
+     "product_manufacturer": 5428,
+     "product_main_ean": "5411188112709",
+     "product_warnings": null,
+     "product_storage_cond_use": "Temp +1..+25 °C <br>Enne kasutamist loksutada.<br>Peale avamist säilitada külmkapis (max. 7°C) ja tarbida 5 päeva jooksul.<br><br>Sobib niisama joomiseks, smuutidesse, hommikusöögi helvestele, müslile.",
+     "description": "Alpro magustamata mandlijook. Joogis on palju vitamiine – kaltsium, B2-vitamiin, B12-vitamiin D-vitamiin ja E-vitamiin. Piima- ja gluteenivaba. Looduslikult laktoosivaba. Kui jood kohvi piimaga (või laktoosivaba piimaga), võib sulle meeldida ka Alpro mandlijook. Vahemere äärest pärit röstitud mandlid annavad sellele maheda ja magusa maitse. Jook ei sisalda loomset päritolu koostisosi, seetõttu saab sellega valmistada vegan-, taimseid ja teisi maitsvaid sööke, nagu hommikusöök, puder, smuuti. Toode sobib suurepäraselt veganitele, samuti inimestele, kellel on laktoositalumatus või gluteenitalumatus.",
+     "category": [
+      {
+       "category_id": 234,
+       "is_virtual": "false",
+       "position": 1717,
+       "name": "Piimad, koored",
+       "category_uid": "MjM0"
+      },
+      {
+       "category_id": 234,
+       "is_virtual": "false",
+       "position": 99999,
+       "name": "Piimad, koored",
+       "category_uid": "MjM0"
+      },
+      {
+       "name": "Laktoosivaba",
+       "category_id": 352,
+       "is_virtual": true,
+       "position": 33555,
+       "category_uid": "MzUy"
+      },
+      {
+       "name": "Gluteenivaba",
+       "category_id": 353,
+       "is_virtual": true,
+       "position": 33371,
+       "category_uid": "MzUz"
+      },
+      {
+       "name": "Suhkruvaba",
+       "category_id": 354,
+       "is_virtual": true,
+       "position": 32623,
+       "category_uid": "MzU0"
+      },
+      {
+       "name": "Vegan",
+       "category_id": 355,
+       "is_virtual": true,
+       "position": 33506,
+       "category_uid": "MzU1"
+      },
+      {
+       "name": "FB",
+       "category_id": 427,
+       "is_virtual": true,
+       "position": 33663,
+       "category_uid": "NDI3"
+      },
+      {
+       "name": "Alpro",
+       "category_id": 444,
+       "is_virtual": true,
+       "position": 9904,
+       "category_uid": "NDQ0"
+      }
+     ],
+     "stock": {
+      "product_id": 8307,
+      "item_id": 8307,
+      "stock_id": 1,
+      "qty": 0,
+      "is_in_stock": false,
+      "is_qty_decimal": false,
+      "use_config_min_qty": true,
+      "min_qty": 0,
+      "use_config_min_sale_qty": true,
+      "min_sale_qty": 1,
+      "use_config_max_sale_qty": true,
+      "max_sale_qty": 500,
+      "use_config_notify_stock_qty": true,
+      "notify_stock_qty": 0,
+      "use_config_qty_increments": true,
+      "backorders": false,
+      "use_config_backorders": true,
+      "qty_increments": 1,
+      "use_config_enable_qty_inc": true,
+      "enable_qty_increments": false,
+      "use_config_manage_stock": true,
+      "manage_stock": false,
+      "low_stock_date": null,
+      "stock_status": 1
+     }
+    }
+   }
+  ]
+ }
+}

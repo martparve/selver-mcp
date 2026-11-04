@@ -173,6 +173,11 @@ Claude should list eight tools: `search_products`, `get_products`, `compare_pric
 **Just search, don't commit:**
 > Mis on praegu Selveris odavaim kreeka jogurt?
 
+**Check nutrition, allergens, alcohol:**
+> Leia Selverist ja Rimist kreeka jogurt, kus on kõige rohkem valku ja vähem kui 5 g küllastunud rasva 100 g kohta.
+
+> Kas see küpsis sisaldab gluteeni? Näita koostist.
+
 **Remove items:**
 > Võta kurk ostukorvist välja.
 
@@ -247,20 +252,33 @@ Every tool takes a `store` (`selver`, `rimi`, `barbora`); search tools take `sto
 
 | Tool | Description |
 |------|-------------|
-| `search_products` | Search one or more stores with each store's own engine. Returns price, discount, unit price, `qty_step`/`min_qty`/`sold_by_weight`, `in_stock`, category, nutrition (Selver), URL. `sort`: relevance, price_asc, price_desc. |
-| `get_products` | Same product record for a list of SKUs in one store. |
+| `search_products` | Search one or more stores with each store's own engine. Returns price, discount, unit price, `qty_step`/`min_qty`/`sold_by_weight`, `in_stock`, category, URL, and (Selver) nutrition, alcohol, dietary tags, brand, origin, allergens. `sort`: relevance, price_asc, price_desc. `details: true` adds the `details` block (for Rimi this reads each product page, so keep `limit` small). |
+| `get_products` | Full product record for a list of SKUs in one store, including `details`. Rimi reads the product page. |
 | `compare_prices` | Price a shopping list (`items: [{query, qty}]`) across stores: top candidates per line per store with line totals and an estimated total per store. |
 | `add_to_cart` | Selver: puts lines in the guest cart server-side (`mode: set` default, `mode: add`), snaps quantities, returns the cart with real totals. Rimi/Barbora: resolves products and returns `browser.script` to run in the store's tab. |
 | `view_cart` | Selver: lines and grand total. Rimi/Barbora: a read script for the tab. `store: "all"` lists every store. |
 | `remove_from_cart` / `clear_cart` | Selver: server-side. Rimi/Barbora: returns a script for the tab. |
 | `get_browser_sync_script` | Selver: steps and JavaScript that make the server cart visible in a browser. Rimi/Barbora: steps to open the store tab and read the cart. |
 
+### Product record: health and origin fields
+
+| Field | Selver | Rimi | Barbora |
+|---|---|---|---|
+| `nutrition` (`per`: 100g/100ml, kcal, protein, carbs, fat, `saturated_fat_g`, sugars, `fibre_g`, salt) | search + get | product page (`get_products`, `details: true`) | - |
+| `alcohol` (`abv_pct`, `type`) | search + get | product page | - |
+| `dietary` (`vegan`, `gluten_free`, `lactose_free`, `sugar_free`, `no_added_sugar`, `organic`) | search + get | - | - |
+| `brand`, `country_of_origin` | search + get | product page | brand only |
+| `allergens` | store field, else words marked in the ingredients | words marked in the ingredients | - |
+| `details`: `ingredients`, `allergens_marked`, `nutrition_extra`, `warnings`, `storage`, `manufacturer`, `description`, `ean` | get, or search with `details: true` | product page | - |
+
+`allergens_marked` is read from how the store marks allergens in the ingredient list (Selver `<bold>`, Rimi CAPITALS). It is a heuristic: it can pick up a capitalised non-allergen word (Rimi's "VÕIvad") and cannot see allergens the store did not mark. Tell users to check the package. Fibre is `null` at Selver (not in its data) and only filled at Rimi when the page lists it.
+
 ### Store adapters
 
 | Store | Search | Cart | Notes (verified October 2026) |
 |---|---|---|---|
-| Selver | Klevu + Vue Storefront catalog + live stock | Server-side guest cart, token held by the MCP, replayed into the SPA | Bag fee 0.50 €. Nutrition available. |
-| Rimi | Server-rendered search page parsed from HTML (`/epood/ee/otsing`) | Guest cart bound to an httpOnly Laravel session: in-page `PUT /epood/cart/change` + `GET /epood/cart/refresh` with the `XSRF-TOKEN` cookie | Minimum order 20 €. Unavailable items show "Ei ole saadaval". |
+| Selver | Klevu + Vue Storefront catalog + live stock | Server-side guest cart, token held by the MCP, replayed into the SPA | Bag fee 0.50 €. Nutrition, saturated fat, alcohol type and %, dietary tags, origin, brand, maker, ingredients, warnings, EAN in every catalog record. |
+| Rimi | Server-rendered search page parsed from HTML (`/epood/ee/otsing`); product page (`/epood/ee/tooted/p/{code}`, redirects to the canonical URL) for details | Guest cart bound to an httpOnly Laravel session: in-page `PUT /epood/cart/change` + `GET /epood/cart/refresh` with the `XSRF-TOKEN` cookie | Minimum order 20 €. Unavailable items show "Ei ole saadaval". Search cards have no nutrition; the product page has the nutrition table, ingredients, origin, brand, maker, alcohol %. |
 | Barbora | Product list embedded in the search page (`window.b_productList`) | No guest cart; in-page calls to `/api/eshop/v1/cart/*` in a logged-in tab | 4 € fee under 39.99 €. Many promo prices need the loyalty card. Rate-limits bursts with empty 200 pages, so requests are throttled to 2 in parallel with retries. Cart JSON shape unverified until a logged-in run. |
 | Coop | not supported | | ecoop.ee redirects to Wolt/Bolt; Haapsalu runs WooCommerce (Store API, guest cart) and could be added on request. |
 
@@ -268,6 +286,7 @@ Every tool takes a `store` (`selver`, `rimi`, `barbora`); search tools take `sto
 
 - **Search:** the website's search box uses [Klevu](https://www.klevu.com) (`POST https://eucs3v2.ksearchnet.com/cs/v2/search` with a public client-side key). The Vue Storefront Elasticsearch proxy at `/api/catalog/vue_storefront_catalog_et/product/_search` holds the full product records (nutrition, unit prices, discounts, `product_weight_step`) but its `q=` ranking is poor, so selver-mcp uses Klevu for ranking and the catalog for details. The catalog is the fallback when Klevu is down.
 - **Stock:** the catalog index's stock fields are stale. Live availability and ordering rules come from `GET /api/stock/list?skus=A,B,C` (literal commas; one unknown SKU fails the whole call).
+- **Product details:** catalog records carry `product_nutr_*` (incl. `product_nutr_fats_acids` = saturated fat, `product_nutr_info` = vitamins/minerals), `product_ingrediens` (allergens wrapped in `<bold>`), `product_warnings`, `product_storage_cond_use`, `product_main_ean`. Select-type fields are option ids: `product_alcohol_type` ("Hele õlu 6,7%"), `product_dietary_info`, `product_country_of_origin`, `product_brand`, `product_manufacturer`, `product_nutr_unit` (100 g / 100 ml). Their labels come from `POST /api/catalog/vue_storefront_catalog_et/attribute/_search` (one request, ~220 kB, cached 12 h). `product_allergens` is nearly always empty, so `allergens` falls back to the words marked in the ingredient list.
 - **Weight goods:** `product_weight_step` is a string (`"0.30"`). Quantities are in kg and must be multiples of the step, otherwise Selver answers `Toote samm on muutunud (0.3)`.
 - **Cart:** `/api/cart/{create,update,pull,delete,totals}`. `update` without `item_id` *adds* to an existing line; with `item_id` it *sets* the quantity. `pull` prices exclude VAT; `totals` has the real numbers and the packaging fee.
 - **Browser:** the Vue 2 SPA keeps its own cart state and ignores a guest server cart. The replay script sets the token in `localStorage` and the store (`cart/cart/SRV_TOKEN`), then replays `/api/cart/pull` items through `cart/getProductVariant` + `cart/addItem {forceServerSilence: true}`, fixes quantities with `cart/updateQuantity`, removes stale lines, and calls `cart/syncTotals`. When the user logs in, Vue Storefront merges the guest cart into their account.
@@ -289,14 +308,15 @@ src/
 ├── core/
 │   ├── types.ts              # Product, StoreAdapter, ServerCartApi, BrowserCartApi
 │   ├── qty.ts                # quantity snapping and rounding
+│   ├── text.ts               # HTML → text, ingredient cleanup, marked-allergen extraction, alcohol %
 │   └── http.ts               # throttled fetch with retries and bot-challenge detection
 ├── tools/
 │   ├── search.ts             # search_products, get_products, compare_prices
 │   └── cart.ts               # add_to_cart, view_cart, remove_from_cart, clear_cart, get_browser_sync_script
 ├── stores/
 │   ├── registry.ts           # store id → adapter
-│   ├── selver/               # Klevu search, catalog hydration, live stock, guest cart, SPA replay script
-│   ├── rimi/                 # HTML search parser, in-page cart script
+│   ├── selver/               # Klevu search, catalog hydration, attribute labels, live stock, guest cart, SPA replay script
+│   ├── rimi/                 # HTML search and product-page parsers, in-page cart script
 │   └── barbora/              # embedded-JSON search parser, in-page cart script
 └── storage/
     └── cart-token.ts         # ~/.selver-mcp/carts.json (per-store server cart tokens)
