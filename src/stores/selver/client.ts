@@ -4,7 +4,9 @@ import type {
   StoreAdapter, ServerCartApi,
 } from '../../core/types.js';
 import { klevuSearch, type KlevuRecord } from './klevu.js';
-import { parseNutrition, parseKlevuCategory, parseEsCategory, deriveUnitPricePer, resolveQtyRules } from './parser.js';
+import { parseNutrition, parseAlcohol, parseDietary, parseKlevuCategory, parseEsCategory, deriveUnitPricePer, resolveQtyRules } from './parser.js';
+import { getAttributeLabels, label, type AttributeLabels } from './attributes.js';
+import { cleanIngredients, htmlToText, markedAllergens } from '../../core/text.js';
 import { snapQty, round2 } from '../../core/qty.js';
 import { browserSyncInstructions, removeScript } from './sync-script.js';
 
@@ -32,7 +34,34 @@ function isExpiredToken(code: number, result: unknown): boolean {
   return code === 404 && typeof result === 'string' && /no such entity/i.test(result);
 }
 
-export function buildProduct(raw: SelverRawProduct | undefined, klevu: KlevuRecord | undefined, stock: StockInfo | undefined): Product {
+/** Health and origin fields from the full catalog record; option ids are decoded with the attribute labels. */
+export function buildDetails(raw: SelverRawProduct | undefined, labels: AttributeLabels): Pick<Product,
+  'nutrition' | 'allergens' | 'alcohol' | 'dietary' | 'brand' | 'country_of_origin' | 'details'> {
+  if (!raw) return { nutrition: null, allergens: null, alcohol: null, dietary: [], brand: null, country_of_origin: null };
+  const allergens_marked = markedAllergens(raw.product_ingrediens);
+  const storeAllergens = htmlToText(raw.product_allergens);
+  const hasAlcoholType = raw.product_alcohol_type !== null && raw.product_alcohol_type !== undefined && raw.product_alcohol_type !== '';
+  return {
+    nutrition: parseNutrition(raw, label(labels, 'product_nutr_unit', raw.product_nutr_unit)),
+    allergens: storeAllergens ?? (allergens_marked.length ? allergens_marked.join(', ') : null),
+    alcohol: parseAlcohol(label(labels, 'product_alcohol_type', raw.product_alcohol_type), hasAlcoholType),
+    dietary: parseDietary((raw.product_dietary_info ?? []).map(id => label(labels, 'product_dietary_info', id))),
+    brand: label(labels, 'product_brand', raw.product_brand),
+    country_of_origin: label(labels, 'product_country_of_origin', raw.product_country_of_origin),
+    details: {
+      ingredients: cleanIngredients(raw.product_ingrediens),
+      allergens_marked,
+      nutrition_extra: htmlToText(raw.product_nutr_info),
+      warnings: htmlToText(raw.product_warnings),
+      storage: htmlToText(raw.product_storage_cond_use),
+      manufacturer: label(labels, 'product_manufacturer', raw.product_manufacturer),
+      description: htmlToText(raw.description, 600),
+      ean: raw.product_main_ean ?? null,
+    },
+  };
+}
+
+export function buildProduct(raw: SelverRawProduct | undefined, klevu: KlevuRecord | undefined, stock: StockInfo | undefined, labels: AttributeLabels = {}): Product {
   const sku = raw?.sku ?? klevu?.sku ?? '';
   const name = raw?.name ?? klevu?.name ?? '';
   const klevuPrice = klevu?.salePrice ? parseFloat(klevu.salePrice) : NaN;
@@ -45,6 +74,7 @@ export function buildProduct(raw: SelverRawProduct | undefined, klevu: KlevuReco
   const in_stock: boolean | null = stock ? stock.in_stock : klevu ? klevu.inStock === 'yes' : null;
   const url_path = raw?.url_path ?? raw?.slug;
   const url = url_path ? `${BASE_URL}/${url_path}` : (klevu?.url ?? `${BASE_URL}/otsing?q=${encodeURIComponent(sku)}`);
+  const health = buildDetails(raw, labels);
   return {
     store: 'selver',
     sku,
@@ -58,10 +88,16 @@ export function buildProduct(raw: SelverRawProduct | undefined, klevu: KlevuReco
     ...rules,
     in_stock,
     category: parseKlevuCategory(klevu?.klevu_category) ?? (raw ? parseEsCategory(raw) : null),
-    nutrition: raw ? parseNutrition(raw) : null,
-    allergens: raw?.product_allergens ?? null,
-    age_restricted: raw?.product_age_restricted ?? false,
+    nutrition: health.nutrition,
+    allergens: health.allergens,
+    // An alcohol type counts as restricted unless it is known to be alcohol-free.
+    age_restricted: (raw?.product_age_restricted ?? false) || (health.alcohol !== null && health.alcohol.abv_pct !== 0),
+    alcohol: health.alcohol,
+    dietary: health.dietary,
+    brand: health.brand,
+    country_of_origin: health.country_of_origin,
     url,
+    ...(health.details ? { details: health.details } : {}),
   };
 }
 
@@ -98,35 +134,35 @@ export class SelverClient implements StoreAdapter {
 
     if (klevuRecords) {
       const skus = klevuRecords.map(r => r.sku);
-      const rawBySku = await this.catalogBySku(skus);
+      const [rawBySku, labels] = await Promise.all([this.catalogBySku(skus), getAttributeLabels(CATALOG_URL)]);
       // Stock must only be asked about SKUs the catalog knows: one unknown SKU 404s the whole call.
       const stockByPid = await this.stockBySku(skus.filter(s => rawBySku.has(s)));
       const products = klevuRecords.map(k => {
         const raw = rawBySku.get(k.sku);
-        return buildProduct(raw, k, raw?.stock?.product_id != null ? stockByPid.get(raw.stock.product_id) : undefined);
+        return buildProduct(raw, k, raw?.stock?.product_id != null ? stockByPid.get(raw.stock.product_id) : undefined, labels);
       });
       return { store: 'selver', query, source: 'klevu', total, products };
     }
 
     // Fallback: Vue Storefront Elasticsearch proxy (worse ranking, but independent of Klevu).
-    const data = await this.esQueryString(query, size);
+    const [data, labels] = await Promise.all([this.esQueryString(query, size), getAttributeLabels(CATALOG_URL)]);
     const raws = (data.hits?.hits ?? []).map(h => h._source);
     const t = data.hits?.total;
     total = typeof t === 'number' ? t : t?.value ?? raws.length;
     const stockByPid = await this.stockBySku(raws.map(r => r.sku));
-    const products = raws.map(raw => buildProduct(raw, undefined, raw.stock?.product_id != null ? stockByPid.get(raw.stock.product_id) : undefined));
+    const products = raws.map(raw => buildProduct(raw, undefined, raw.stock?.product_id != null ? stockByPid.get(raw.stock.product_id) : undefined, labels));
     return { store: 'selver', query, source: 'elasticsearch', total, products };
   }
 
   async getProducts(skus: string[]): Promise<Product[]> {
     if (skus.length === 0) return [];
-    const rawBySku = await this.catalogBySku(skus);
+    const [rawBySku, labels] = await Promise.all([this.catalogBySku(skus), getAttributeLabels(CATALOG_URL)]);
     const stockByPid = await this.stockBySku(skus.filter(s => rawBySku.has(s)));
     return skus
       .filter(sku => rawBySku.has(sku))
       .map(sku => {
         const raw = rawBySku.get(sku)!;
-        return buildProduct(raw, undefined, raw.stock?.product_id != null ? stockByPid.get(raw.stock.product_id) : undefined);
+        return buildProduct(raw, undefined, raw.stock?.product_id != null ? stockByPid.get(raw.stock.product_id) : undefined, labels);
       });
   }
 

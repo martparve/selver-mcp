@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
-import { parseRimiSearchHtml, parseEuro } from '../src/stores/rimi/parser.js';
+import { parseRimiSearchHtml, parseRimiProductPage, parseEuro } from '../src/stores/rimi/parser.js';
 import { RimiClient, rimiScript } from '../src/stores/rimi/client.js';
 import { extractProductList, barboraToProduct, BarboraClient, barboraScript } from '../src/stores/barbora/client.js';
 import { getStore, STORE_IDS } from '../src/stores/registry.js';
@@ -59,10 +59,33 @@ describe('RimiClient', () => {
     expect([...prices].sort((a, b) => a - b)).toEqual(prices);
   });
 
-  it('getProducts looks each code up through search', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(htmlRes(fixture('rimi-search-kurk.html')));
+  it('getProducts reads the product page by code', async () => {
+    const spy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(htmlRes(fixture('rimi-product-milk.html')));
+    const [milk] = await new RimiClient().getProducts(['964869']);
+    expect(String(spy.mock.calls[0][0])).toBe('https://www.rimi.ee/epood/ee/tooted/p/964869');
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(milk.nutrition?.saturated_fat_g).toBe(2.3);
+    expect(milk.details?.manufacturer).toBe('Valio Eesti AS');
+  });
+
+  it('getProducts falls back to search when the product page fails', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async input =>
+      String(input).includes('/tooted/p/') ? htmlRes('not found', 404) : htmlRes(fixture('rimi-search-kurk.html')));
     const r = await new RimiClient().getProducts(['275290', '000']);
     expect(r.map(p => p.sku)).toEqual(['275290']);
+    expect(r[0].details).toBeUndefined();
+  });
+
+  it('enrichDetails reads each search result page and keeps the card when a page fails', async () => {
+    const full = parseRimiProductPage(fixture('rimi-product-milk.html'), '964869')!;
+    const { details: _d, ...card } = { ...full, nutrition: null };
+    const kurk = parseRimiSearchHtml(fixture('rimi-search-kurk.html'))[0];
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async input =>
+      String(input) === card.url ? htmlRes(fixture('rimi-product-milk.html')) : htmlRes('gone', 404));
+    const [milk, cucumber] = await new RimiClient().enrichDetails([card, kurk]);
+    expect(milk.nutrition?.energy_kcal).toBe(67);
+    expect(milk.details?.ingredients).toBe('täisPIIM');
+    expect(cucumber).toBe(kurk);
   });
 
   it('generates a browser script that parses as JavaScript', () => {

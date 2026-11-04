@@ -226,7 +226,7 @@ describe('SelverClient.putCartItem', () => {
   const pikkKurk: Product = {
     store: 'selver', sku: 'T000049036', name: 'Pikk kurk, kg', price: 1.99, original_price: 2.29, discount_pct: 13, unit_price: 1.99, unit_price_per: 'kg',
     volume: 'kg', qty_step: 0.3, min_qty: 0.3, sold_by_weight: true, in_stock: true, category: null, nutrition: null, allergens: null,
-    age_restricted: false, url: 'https://www.selver.ee/pikk-kurk-kg',
+    age_restricted: false, alcohol: null, dietary: [], brand: null, country_of_origin: null, url: 'https://www.selver.ee/pikk-kurk-kg',
   };
   beforeEach(() => { client = new SelverClient(); vi.restoreAllMocks(); });
 

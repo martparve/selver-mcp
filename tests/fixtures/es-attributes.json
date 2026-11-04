@@ -1,0 +1,161 @@
+{
+ "hits": {
+  "total": {
+   "value": 6
+  },
+  "hits": [
+   {
+    "_source": {
+     "attribute_code": "product_country_of_origin",
+     "frontend_label": "Päritolu",
+     "optionsPacked": [
+      [
+       "Eesti",
+       "22"
+      ],
+      [
+       "Kreeka",
+       "811"
+      ],
+      [
+       "Poola",
+       "70"
+      ],
+      [
+       "Prantsusmaa",
+       "83"
+      ]
+     ]
+    }
+   },
+   {
+    "_source": {
+     "attribute_code": "product_dietary_info",
+     "frontend_label": "Lisainfo",
+     "optionsPacked": [
+      [
+       "Gluteenivaba",
+       "1809",
+       {
+        "type": 2,
+        "value": "/g/l/gluteenivaba_40x40.gif"
+       }
+      ],
+      [
+       "Laktoosivaba",
+       "2081",
+       {
+        "type": 2,
+        "value": "/l/a/laktoosivaba_40x40.gif"
+       }
+      ],
+      [
+       "Suhkruvaba",
+       "2088",
+       {
+        "type": 2,
+        "value": "/s/u/suhkruta_40x40.gif"
+       }
+      ],
+      [
+       "Vegan",
+       "1085",
+       {
+        "type": 2,
+        "value": "/v/e/vegan_40x40.gif"
+       }
+      ]
+     ]
+    }
+   },
+   {
+    "_source": {
+     "attribute_code": "product_nutr_unit",
+     "frontend_label": " ",
+     "optionsPacked": [
+      [
+       " 100 milliliitri kohta",
+       "1004"
+      ],
+      [
+       "100 grammi kohta",
+       "20"
+      ]
+     ]
+    }
+   },
+   {
+    "_source": {
+     "attribute_code": "product_manufacturer",
+     "frontend_label": "Käitleja",
+     "optionsPacked": [
+      [
+       "FARMI PIIMATÖÖSTUS AS",
+       "2751"
+      ],
+      [
+       "NUTRICIA SIA",
+       "5428"
+      ],
+      [
+       "SAKU ÕLLETEHASE AS",
+       "2506"
+      ],
+      [
+       "SELVER AS",
+       "505"
+      ],
+      [
+       "VEGESTAR OÜ",
+       "8661"
+      ]
+     ]
+    }
+   },
+   {
+    "_source": {
+     "attribute_code": "product_alcohol_type",
+     "frontend_label": "Alkoholi liik",
+     "optionsPacked": [
+      [
+       "Alkoholivaba õlu",
+       "5358"
+      ],
+      [
+       "Hele õlu 6,7%",
+       "5231"
+      ]
+     ]
+    }
+   },
+   {
+    "_source": {
+     "attribute_code": "product_brand",
+     "frontend_label": "Bränd",
+     "optionsPacked": [
+      [
+       "ALPRO",
+       "3455"
+      ],
+      [
+       "FAGE",
+       "10450"
+      ],
+      [
+       "FARMI",
+       "2752"
+      ],
+      [
+       "GRIMBERGEN",
+       "7403"
+      ],
+      [
+       "THORMI",
+       "8662"
+      ]
+     ]
+    }
+   }
+  ]
+ }
+}

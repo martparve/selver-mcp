@@ -1,6 +1,8 @@
 import type { SelverRawProduct, StockInfo } from './types.js';
-import type { NutritionPer100g, UnitPricePer } from '../../core/types.js';
+import type { AlcoholInfo, DietaryTag, NutritionPer100g, UnitPricePer } from '../../core/types.js';
 import { round3 } from '../../core/qty.js';
+import { parseAbv } from '../../core/text.js';
+export { parseAbv } from '../../core/text.js';
 export { round2, round3, snapQty } from '../../core/qty.js';
 
 export function parseNutrientValue(value: string | null | undefined): number {
@@ -18,18 +20,67 @@ export function parseEnergyKcal(value: string | null | undefined): number {
 
 type RawNutritionFields = Pick<SelverRawProduct,
   'product_nutr_energy' | 'product_nutr_proteins' | 'product_nutr_carbohydrates' |
-  'product_nutr_fats' | 'product_nutr_sugars' | 'product_nutr_salt'>;
+  'product_nutr_fats' | 'product_nutr_sugars' | 'product_nutr_salt' | 'product_nutr_fats_acids'>;
 
-export function parseNutrition(raw: RawNutritionFields): NutritionPer100g | null {
+function optionalNutrient(value: string | null | undefined): number | null {
+  if (value === null || value === undefined || String(value).trim() === '') return null;
+  const n = parseFloat(String(value).replace(',', '.'));
+  return Number.isFinite(n) ? n : null;
+}
+
+/** "100 grammi kohta" / " 100 milliliitri kohta" (the product_nutr_unit label) → per. */
+export function parseNutritionPer(unitLabel: string | null | undefined): NutritionPer100g['per'] {
+  if (!unitLabel) return null;
+  if (/milliliit|\bml\b/i.test(unitLabel)) return '100ml';
+  if (/gramm|\bg\b/i.test(unitLabel)) return '100g';
+  return null;
+}
+
+export function parseNutrition(raw: RawNutritionFields, unitLabel?: string | null): NutritionPer100g | null {
   if (!raw.product_nutr_proteins && !raw.product_nutr_energy) return null;
   return {
+    per: parseNutritionPer(unitLabel),
     energy_kcal: parseEnergyKcal(raw.product_nutr_energy),
     protein_g: parseNutrientValue(raw.product_nutr_proteins),
     carbs_g: parseNutrientValue(raw.product_nutr_carbohydrates),
     fat_g: parseNutrientValue(raw.product_nutr_fats),
+    saturated_fat_g: optionalNutrient(raw.product_nutr_fats_acids),
     sugars_g: parseNutrientValue(raw.product_nutr_sugars),
+    fibre_g: null,
     salt_g: parseNutrientValue(raw.product_nutr_salt),
   };
+}
+
+/** Selver alcohol type label → AlcoholInfo (label cleaned of markup). */
+export function parseAlcohol(typeLabel: string | null, hasAlcoholType: boolean): AlcoholInfo | null {
+  if (!hasAlcoholType) return null;
+  const type = typeLabel ? typeLabel.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() : null;
+  return { abv_pct: parseAbv(type), type };
+}
+
+const DIETARY_TOKENS: Array<[RegExp, DietaryTag]> = [
+  [/^(vegan)$/i, 'vegan'],
+  [/^(gluten|gluteenivaba)$/i, 'gluten_free'],
+  [/^(lactose|laktoosivaba)$/i, 'lactose_free'],
+  [/^(sugar|suhkruvaba)$/i, 'sugar_free'],
+  // Selver's own label is misspelt "Lisatud suhkuteta".
+  [/^(added_sugar|lisatud suhk\p{L}*ta)$/iu, 'no_added_sugar'],
+  [/^(eco|mahe)$/i, 'organic'],
+];
+
+/**
+ * Selver dietary option labels → tags. Labels are either Estonian ("Gluteenivaba") or
+ * caret-joined codes ("lactose^gluten^vegan^sugar").
+ */
+export function parseDietary(labels: Array<string | null>): DietaryTag[] {
+  const out: DietaryTag[] = [];
+  for (const l of labels) {
+    for (const token of (l ?? '').split('^').map(s => s.trim()).filter(Boolean)) {
+      const tag = DIETARY_TOKENS.find(([re]) => re.test(token))?.[1];
+      if (tag && !out.includes(tag)) out.push(tag);
+    }
+  }
+  return out;
 }
 
 /** Selver returns product_weight_step as a string ("0.30"), occasionally as a number, often null. */

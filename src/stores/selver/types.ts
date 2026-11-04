@@ -32,6 +32,21 @@ export interface SelverRawProduct {
   product_nutr_fats?: string | null;
   product_nutr_sugars?: string | null;
   product_nutr_salt?: string | null;
+  /** Saturated fatty acids, g per 100 g/ml. */
+  product_nutr_fats_acids?: string | null;
+  /** Vitamins and minerals as free text, e.g. "Kaltsium 121 mg (15%*) ...". */
+  product_nutr_info?: string | null;
+  // Option ids; their labels come from the attribute index (see attributes.ts).
+  product_nutr_unit?: number | string | null;
+  product_alcohol_type?: number | string | null;
+  product_dietary_info?: Array<number | string> | null;
+  product_country_of_origin?: number | string | null;
+  product_brand?: number | string | null;
+  product_manufacturer?: number | string | null;
+  product_main_ean?: string | null;
+  product_warnings?: string | null;
+  product_storage_cond_use?: string | null;
+  description?: string | null;
   category?: Array<{ name?: string; is_virtual?: boolean | string }>;
   stock?: SelverRawStock;
 }
